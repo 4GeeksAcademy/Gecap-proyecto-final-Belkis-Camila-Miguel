@@ -12,23 +12,22 @@ export const Sidebar = () => {
     ];
 
     return (
-      <div className="d-flex flex-column flex-shrink-0 p-3 shadow"
-    style={{ width: "260px", height: "100vh", backgroundColor: "#566873", color: "#ebf2f1", position: "sticky", top: 0 }}>
+        <div className="d-flex flex-column flex-shrink-0 p-3 shadow"
+            style={{ width: "260px", height: "100vh", backgroundColor: "#566873", color: "#ebf2f1", position: "sticky", top: 0 }}>
 
-    {/* Contenedor del Logo Centrado */}
-    <div className="d-flex justify-content-center align-items-center mb-5 mt-2 w-100">
-        <img
-            src="/Logo-GECAP-vertical.png"
-            alt="Logo GECAP"
-            style={{ 
-                width: "180px",      // He aumentado el ancho para que se lea mejor al ser vertical
-                height: "auto",      // 'auto' mantiene la proporción original
-                objectFit: "contain" 
-            }}
-        />
-    </div>
+            <div className="d-flex justify-content-center align-items-center mb-2 mt-2 w-100"> 
+                <img
+                    src="src/front/assets/img/favicon.png"
+                    alt="favicon GECAP"
+                    style={{
+                        width: "100px",
+                        height: "auto",
+                        objectFit: "contain"
+                    }}
+                />
+            </div>
 
-    <hr style={{ backgroundColor: "#93bbbf", opacity: 0.5 }} />
+            <hr style={{ backgroundColor: "#93bbbf", opacity: 0.5 }} />
 
             <ul className="nav nav-pills flex-column mb-auto">
                 {menuItems.map((item, index) => {

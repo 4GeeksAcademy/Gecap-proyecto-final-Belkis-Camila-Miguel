@@ -55,7 +55,6 @@ export default function Healthform() {
 
       <div className="row">
         <div className="col-12">
-          {/* SECCIÓN DATOS PERSONALES */}
           <div className="card border-0 shadow-sm mb-4">
             <h5 className="card-header text-white border-0" style={{ backgroundColor: "#93bbbf" }}>
               <i className="fas fa-user-edit me-2"></i> Datos Personales
@@ -72,9 +71,8 @@ export default function Healthform() {
             </div>
           </div>
 
-          {/* SECCIÓN HISTORIA MÉDICA */}
           <div className="card border-0 shadow-sm mb-4">
-            <h5 className="card-header text-white border-0" style={{ backgroundColor: "#566873" }}>
+            <h5 className="card-header text-white border-0" style={{ backgroundColor: "#93bbbf"}}>
               <i className="fas fa-file-medical me-2"></i> Historia Médica y Cuestionario
             </h5>
             <div className="card-body bg-white">

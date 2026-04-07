@@ -25,9 +25,6 @@ export const router = createBrowserRouter(
 
 
 <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
-
-      {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
-       <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
       <Route path="/" element={<Home />} />
       <Route path="/healthform" element={<Healthform />} />
       <Route element={<FichaPaciente />} path="/paciente" />
