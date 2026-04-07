@@ -1,17 +1,32 @@
-import { Outlet } from "react-router-dom/dist"
-import ScrollToTop from "../components/ScrollToTop"
-import { Navbar } from "../components/Navbar"
-import { Footer } from "../components/Footer"
+import React from "react";
+import { Outlet } from "react-router-dom";
+import ScrollToTop from "../components/ScrollToTop";
+import { Sidebar } from "../components/Sidebar";
+import { Footer } from "../components/Footer";
 
 
-
-// Base component that maintains the navbar and footer throughout the page and the scroll to top functionality.
 export const Layout = () => {
     return (
         <ScrollToTop>
-            <Navbar />
-                <Outlet />
-            <Footer />
+            <div className="d-flex" style={{ minHeight: "100vh" }}>
+                <Sidebar />
+
+                <div
+                    className="flex-grow-1 d-flex flex-column"
+                    style={{
+                        backgroundImage: `linear-gradient(rgba(235, 242, 241, 0.85), rgba(235, 242, 241, 0.85)), url('/backgroundImg.png')`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundAttachment: "fixed",
+                        minHeight: "100vh"
+                    }}
+                >
+                    <main className="p-4 flex-grow-1">
+                        <Outlet />
+                    </main>
+                    <Footer />
+                </div>
+            </div>
         </ScrollToTop>
-    )
-}
+    );
+};
