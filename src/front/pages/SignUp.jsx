@@ -1,6 +1,6 @@
 import { useState } from "react";  /*Herramienta de React para guardar datos*/
 import "./SignUp.css";
-import logo from "../assets/gecap-logo.JPG";
+import logo from "../assets/img/gecap_navbar_clean.png";
 
 function SignUp() {
 

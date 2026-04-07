@@ -9,7 +9,7 @@ html, body, #root {
     justify-content: center;
     align-items: center;
     padding: 20px;
-    background-image: url("../assets/background.JPG");
+    background-image: url("../assets/img/backgroundImg.png");
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
