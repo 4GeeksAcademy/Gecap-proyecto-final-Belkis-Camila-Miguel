@@ -1,0 +1,61 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+.signup-page{
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-image: url("../assets/background.JPG");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.signup-card {
+  width: 100%;
+  max-width: 480px;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.signup-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.signup-logo img {
+  width: 180px;
+}
+
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.signup-form input {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.signup-form button {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 999px;
+  border: none;
+  background-color: #5E888C;
+  color: white;
+  cursor: pointer;
+}
+
+.signup-links {
+  margin-top: 15px;
+  text-align: center;
+}
