@@ -5,7 +5,7 @@ export const Sidebar = () => {
     const location = useLocation();
 
     const menuItems = [
-        { name: "Consultas", path: "/", icon: "fas fa-notes-medical" },
+        { name: "Estadisticas", path: "/estadisticas", icon: "fas fa-notes-medical" },
         { name: "Agenda Médica", path: "/agenda", icon: "fas fa-calendar-alt" },
         { name: "Alta de Paciente", path: "/healthform", icon: "fas fa-user-plus" },
         { name: "Ficha de Paciente", path: "/paciente", icon: "fas fa-id-card-alt" },

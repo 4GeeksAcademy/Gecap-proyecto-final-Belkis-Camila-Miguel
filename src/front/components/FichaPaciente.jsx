@@ -1,7 +1,7 @@
 import React from "react";
 
 export const FichaPaciente = () => {
-    // Datos de ejemplo (Luego los traerás de tu base de datos/API)
+    
     const paciente = {
         nombre: "Juan Pérez García",
         dni: "12345678X",
@@ -17,7 +17,7 @@ export const FichaPaciente = () => {
 
     return (
         <div className="container-fluid">
-            {/* Cabecera con Nombre y Estado */}
+            
             <div className="d-flex justify-content-between align-items-center mb-4 p-3 rounded shadow-sm bg-white border-start border-5" style={{ borderColor: "#e8888c" }}>
                 <div>
                     <h2 className="mb-0 fw-bold" style={{ color: "#566873" }}>{paciente.nombre}</h2>

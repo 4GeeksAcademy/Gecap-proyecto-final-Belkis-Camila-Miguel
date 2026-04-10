@@ -1,15 +1,22 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import ScrollToTop from "../components/ScrollToTop";
 import { Sidebar } from "../components/Sidebar";
 import { Footer } from "../components/Footer";
+import { Navbar } from "../components/Navbar";
 
 
 export const Layout = () => {
+    const location = useLocation();
+    console.log("Ruta actual detectada:", location.pathname);
+
+    const isLandingPage = location.pathname === "/" || location.pathname === "/home" || location.pathname.includes("index.html");
+
     return (
         <ScrollToTop>
             <div className="d-flex" style={{ minHeight: "100vh" }}>
-                <Sidebar />
+
+                {!isLandingPage && <Sidebar />}
 
                 <div
                     className="flex-grow-1 d-flex flex-column"
@@ -18,13 +25,18 @@ export const Layout = () => {
                         backgroundSize: "cover",
                         backgroundPosition: "center",
                         backgroundAttachment: "fixed",
-                        minHeight: "100vh"
+                        minHeight: "100vh",
+                        width: isLandingPage ? "100%" : "auto"
                     }}
                 >
-                    <main className="p-4 flex-grow-1">
+
+                    {isLandingPage && <Navbar />}
+
+                    <main className={isLandingPage ? "" : "p-4"}>
                         <Outlet />
                     </main>
-                    <Footer />
+
+                    {isLandingPage && <Footer />}
                 </div>
             </div>
         </ScrollToTop>

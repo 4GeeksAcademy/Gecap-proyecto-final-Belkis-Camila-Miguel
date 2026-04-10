@@ -5,3 +5,15 @@
     --color-texto1: #ebf2f1;
     --color-texto2: #b4d2d9;
 }
+
+.service-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.service-card:hover {
+    transform: translateY(-10px); 
+    box-shadow: 0 10px 20px rgba(86, 104, 115, 0.2) !important; 
+    border-color: #5e888c !important; 
+}
+
