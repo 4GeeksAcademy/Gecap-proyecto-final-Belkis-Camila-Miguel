@@ -1,10 +1,10 @@
 import React from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer";
-import { BuscadorPacientes } from "./BuscadorPacientes"; 
+import { BuscadorPacientes } from "./BuscadorPacientes";
 
 export const FichaPaciente = () => {
     const { store } = useGlobalReducer();
-    const p = store.pacienteActual; 
+    const p = store.pacienteActual;
 
     if (!p) {
         return (
@@ -43,6 +43,18 @@ export const FichaPaciente = () => {
 
     const alertasCriticas = detectarAlertas();
 
+    const esPesoSaludable = () => {
+        if (!p.peso || !p.imc_ideal || p.imc_ideal === "--") return false;
+
+        // Extraemos los números del string "60.5 - 75.2 kg"
+        const [min, max] = p.imc_ideal.replace(" kg", "").split(" - ").map(Number);
+        const pesoActual = Number(p.peso);
+
+        return pesoActual >= min && pesoActual <= max;
+    };
+
+    const saludable = esPesoSaludable();
+
     return (
         <div className="container-fluid py-4 bg-light min-vh-100">
             <div className="mb-3">
@@ -71,6 +83,11 @@ export const FichaPaciente = () => {
                     </h2>
                     <div className="d-flex gap-2 mt-2">
                         <span className="badge px-3 py-2" style={{ backgroundColor: "#93bbbf" }}>Paciente Activo</span>
+                        {saludable && (
+                            <span className="badge bg-success px-3 py-2 animate__animated animate__bounceIn">
+                                <i className="fas fa-medal me-1"></i> Peso Saludable
+                            </span>
+                        )}
                         {alertasCriticas.length > 0 && <span className="badge bg-danger px-3 py-2 uppercase">Riesgo Alérgico</span>}
                     </div>
                 </div>
@@ -82,25 +99,39 @@ export const FichaPaciente = () => {
 
             {/* WIDGETS DE CONSTANTES CON DATOS REALES */}
             <div className="row g-3 mb-4">
-                {[
-                    { label: "Peso Actual", val: `${p.peso || "--"} kg`, color: "#93bbbf", icon: "fa-weight" },
-                    { label: "Última Tensión", val: p.tension || "--", color: "#b4d2d9", icon: "fa-heartbeat" },
-                    { label: "Edad", val: `${p.edad || "--"} años`, color: "#ebf2f1", icon: "fa-birthday-cake" }
-                ].map((item, i) => (
-                    <div className="col-md-4" key={i}>
-                        <div className="p-3 rounded-4 border-0 shadow-sm d-flex align-items-center bg-white border-bottom border-4" style={{ borderColor: item.color }}>
-                            <div className="rounded-circle p-3 me-3" style={{ backgroundColor: item.color + "40" }}>
-                                <i className={`fas ${item.icon}`} style={{ color: "#566873" }}></i>
-                            </div>
-                            <div>
-                                <p className="small text-muted mb-0">{item.label}</p>
-                                <h5 className="fw-bold mb-0" style={{ color: "#566873" }}>{item.val}</h5>
-                            </div>
-                        </div>
+                {/* CAJA 1: Peso Real */}
+                <div className="col-md-3">
+                    <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4" style={{ borderColor: "#93bbbf" }}>
+                        <p className="small text-muted mb-0">Peso Actual</p>
+                        <h5 className="fw-bold mb-0">{p.peso || "--"} kg</h5>
                     </div>
-                ))}
-            </div>
+                </div>
 
+                {/* CAJA 2: Tensión */}
+                <div className="col-md-3">
+                    <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4" style={{ borderColor: "#b4d2d9" }}>
+                        <p className="small text-muted mb-0">Última Tensión</p>
+                        <h5 className="fw-bold mb-0">{p.tension || "--"}</h5>
+                    </div>
+                </div>
+
+                {/* CAJA 3: Edad */}
+                <div className="col-md-3">
+                    <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4" style={{ borderColor: "#ebf2f1" }}>
+                        <p className="small text-muted mb-0">Edad</p>
+                        <h5 className="fw-bold mb-0">{p.edad || "--"} años</h5>
+                    </div>
+                </div>
+
+                {/* CAJA 4: EL OBJETIVO (La que acabamos de crear) */}
+                <div className="col-md-3">
+                    <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4"
+                        style={{ borderColor: saludable ? "#28a745" : "#ffc107" }}>
+                        <p className="small text-muted mb-0">Objetivo Saludable</p>
+                        <h5 className="fw-bold mb-0">{p.imc_ideal || "--"}</h5>
+                    </div>
+                </div>
+            </div>
             <div className="row">
                 <div className="col-lg-4 mb-4">
                     <div className="card border-0 shadow-sm h-100 rounded-4 overflow-hidden">

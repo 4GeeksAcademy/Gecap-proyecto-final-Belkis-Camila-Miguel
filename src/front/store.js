@@ -20,6 +20,7 @@ export const initialStore = () => {
       cp: "",
       peso: "",
       altura: "",
+      imc_ideal: "",
       tension: "",
       frecuencia: "",
       alergia_penicilina: "NO",
