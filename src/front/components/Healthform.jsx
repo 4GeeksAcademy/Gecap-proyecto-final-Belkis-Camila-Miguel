@@ -18,7 +18,7 @@ const InputFloatingFlex = ({ label, name, type = "text", icon, onChange, accentC
       />
       <label className="text-muted small">
         <i className={`${icon} me-2`} style={{ color: accentColor }}></i>
-        {label} {required && <span className="text-danger">*</span>} 
+        {label} {required && <span className="text-danger">*</span>}
       </label>
     </div>
   </div>
@@ -102,6 +102,11 @@ export default function Healthform() {
       return;
     }
 
+    const datosAFicha = {
+        ...formData,
+        imc_ideal: infoIMC.ideal 
+    };
+
     // Si todo está ok, guardamos
     dispatch({ type: 'save_patient', payload: formData });
     alert("¡Paciente registrado con éxito!");
@@ -127,14 +132,21 @@ export default function Healthform() {
   const getInfoIMC = () => {
     const { peso, altura } = formData;
     if (peso && altura && altura > 0) {
-      const imc = (peso / Math.pow(altura / 100, 2)).toFixed(1);
-      if (imc < 18.5) return { valor: imc, label: "Bajo Peso", color: "#17a2b8" };
-      if (imc < 25) return { valor: imc, label: "Normal", color: "#28a745" };
-      if (imc < 30) return { valor: imc, label: "Sobrepeso", color: "#ffc107" };
-      return { valor: imc, label: "Obesidad", color: "#dc3545" };
+      const alturaMetros = altura / 100;
+      const imc = (peso / Math.pow(alturaMetros, 2)).toFixed(1);
+
+      // CÁLCULO DE REFERENCIA (IMC Normal: 18.5 a 24.9)
+      const pesoMin = (18.5 * Math.pow(alturaMetros, 2)).toFixed(1);
+      const pesoMax = (24.9 * Math.pow(alturaMetros, 2)).toFixed(1);
+      const rangoNormal = `${pesoMin} - ${pesoMax} kg`;
+
+      if (imc < 18.5) return { valor: imc, label: "Bajo Peso", color: "#17a2b8", ideal: rangoNormal };
+      if (imc < 25) return { valor: imc, label: "Normal", color: "#28a745", ideal: rangoNormal };
+      if (imc < 30) return { valor: imc, label: "Sobrepeso", color: "#ffc107", ideal: rangoNormal };
+      return { valor: imc, label: "Obesidad", color: "#dc3545", ideal: rangoNormal };
     }
-    return { valor: "--", label: "Faltan datos", color: "#6c757d" };
-  };
+    return { valor: "--", label: "Faltan datos", color: "#6c757d", ideal: "--" };
+};
 
   const infoIMC = getInfoIMC();
 
@@ -308,7 +320,7 @@ export default function Healthform() {
               <button
                 type="button"
                 className="btn btn-sm btn-outline-secondary border-0"
-                onClick={resetAlergias} 
+                onClick={resetAlergias}
                 title="Resetear alergias"
               >
                 <i className="fas fa-undo me-1"></i> Limpiar selección
@@ -364,11 +376,25 @@ export default function Healthform() {
                 <input type="number" name="altura" className="form-control border-0 bg-light text-dark text-center" value={formData.altura} onChange={handleInputChange} />
               </div>
               <div className="col-md-3">
-                <div className="p-2 rounded-3 text-center" style={{ backgroundColor: infoIMC.color + '15', border: `1px solid ${infoIMC.color}` }}>
-                  <span className="d-block fw-bold small" style={{ color: infoIMC.color }}>IMC: {infoIMC.valor}</span>
-                  <small className="fw-bold" style={{ color: infoIMC.color, fontSize: '0.65rem' }}>{infoIMC.label}</small>
+                <div className="p-2 rounded-3 text-center shadow-sm" style={{ backgroundColor: infoIMC.color + '15', border: `1px solid ${infoIMC.color}` }}>
+                  {/* VALOR REAL DEL PACIENTE (Lo que tú introduces) */}
+                  <span className="d-block fw-bold small" style={{ color: infoIMC.color }}>IMC ACTUAL: {infoIMC.valor}</span>
+                  <small className="fw-bold d-block mb-1" style={{ color: infoIMC.color, fontSize: '0.65rem' }}>{infoIMC.label}</small>
+
+                  {/* VALORES NORMALES ESTIMADOS (La referencia médica) */}
+                  {infoIMC.valor !== "--" && (
+                    <div className="mt-1 pt-1 border-top border-secondary-subtle">
+                      <small className="text-muted d-block" style={{ fontSize: '0.6rem', lineHeight: '1.1' }}>
+                        VALORES NORMALES:
+                      </small>
+                      <strong className="text-dark" style={{ fontSize: '0.7rem' }}>
+                        {infoIMC.ideal}
+                      </strong>
+                    </div>
+                  )}
                 </div>
               </div>
+
               <div className="col-md-3">
                 <label className="small fw-bold text-muted mb-1">Tensión</label>
                 <input type="text" name="tension" className="form-control border-0 bg-light text-dark text-center" placeholder="120/80" onChange={handleInputChange} />
