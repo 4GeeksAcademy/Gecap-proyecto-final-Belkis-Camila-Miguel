@@ -16,7 +16,7 @@ function Homeprivado() {
         <div className="container-fluid p-4" style={{ minHeight: "100vh" }}>
 
             <div className="row mb-4 g-3">
-                <div className="col-lg-8">
+                <div className="col-lg-9">
                     <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: "20px", borderLeft: "8px solid #93bbbf" }}>
                         <h2 className="text-secondary mb-1" style={{ fontSize: "1.1em" }}>Bienvenido,</h2>
                         <h1 className="fw-bold" style={{ color: "#566873", fontSize: "2em" }}>{profesional.nombre}</h1>
@@ -28,20 +28,20 @@ function Homeprivado() {
                     </div>
                 </div>
 
-                <div className="col-lg-4">
+                <div className="col-lg-3">
                     <div className="card border-0 shadow-sm p-4 h-100 text-white" style={{ backgroundColor: "#566873", borderRadius: "20px" }}>
                         <div className="d-flex justify-content-around text-center">
                             <div>
-                                <h3 className="mt-2 mb-0">
+                                <h3 className="mt-4">
                                     {stats.totalPacientes === 0
                                         ? "No tienes pacientes hoy"
                                         : `Tienes ${stats.totalPacientes} paciente${stats.totalPacientes > 1 ? "s" : ""} hoy`}
                                 </h3>
-                            </div>
-                        </div>
-                        <button className="btn mt-3 fw-bold shadow-sm" style={{ backgroundColor: "#93bbbf", color: "white" }}>
+                                 <button className="btn mt-3 fw-bold shadow-sm" style={{ backgroundColor: "#93bbbf", color: "white" }}>
                             + Nueva Consulta
                         </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
