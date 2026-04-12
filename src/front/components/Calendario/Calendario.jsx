@@ -21,7 +21,7 @@ function Calendario() {
                 <div className="card border-0 shadow-sm flex-grow-1">
                     <div className="card-body">
                         <h6 className="card-title text-muted">
-                            Agenda del día: <strong>{startDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+                            <strong>{startDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
                         </h6>
                         <hr />
                         <div className="mt-2">

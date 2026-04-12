@@ -6,6 +6,10 @@ const Scheduler = ({ fechaSeleccionada }) => {
 
     const [calendar, setCalendar] = useState(null);
     const [misCitas, setMisCitas] = useState([]);
+    
+
+
+
 
     useEffect(() => {
         if (!calendar || calendar.disposed())
@@ -32,7 +36,6 @@ const Scheduler = ({ fechaSeleccionada }) => {
         theme: "calendar_default",
         durationBarVisible: false,
 
-
         onTimeRangeSelected: async (args) => {
             const modal = await DayPilot.Modal.prompt("Nueva cita", "Nombre y apellido");
             calendar.clearSelection();
@@ -45,14 +48,30 @@ const Scheduler = ({ fechaSeleccionada }) => {
                 end: args.end,
             };
             setMisCitas(prev => [...prev, nuevaCita]);
+         const citasTotales= nuevaCita.length
         },
-        
+
         onBeforeEventRender: args => {
             if (!args.data.backColor) {
                 args.data.backColor = "#93c47d";
             } args.data.borderColor = "darker";
             args.data.fontColor = "white";
-        }
+            args.data.areas = [
+                {
+                    right: 5,
+                    top: 8,
+                    width: 18,
+                    height: 18,
+                    fontColor: "#fff",
+                    text: "X", 
+                    style: "cursor:pointer; background-color: rgba(0,0,0,0.2); border-radius: 50%; text-align: center; line-height: 18px;",
+                    onClick: (argsArea) => {
+                        const e = argsArea.source;
+                        setMisCitas(prev => prev.filter(cita => cita.id !== e.id()));
+                    }
+                }
+            ];
+        },
         
     }
 
