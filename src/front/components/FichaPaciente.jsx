@@ -46,7 +46,6 @@ export const FichaPaciente = () => {
     const esPesoSaludable = () => {
         if (!p.peso || !p.imc_ideal || p.imc_ideal === "--") return false;
 
-        // Extraemos los números del string "60.5 - 75.2 kg"
         const [min, max] = p.imc_ideal.replace(" kg", "").split(" - ").map(Number);
         const pesoActual = Number(p.peso);
 
@@ -123,7 +122,7 @@ export const FichaPaciente = () => {
                     </div>
                 </div>
 
-                {/* CAJA 4: EL OBJETIVO (La que acabamos de crear) */}
+                {/* CAJA 4: EL OBJETIVO */}
                 <div className="col-md-3">
                     <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4"
                         style={{ borderColor: saludable ? "#28a745" : "#ffc107" }}>
