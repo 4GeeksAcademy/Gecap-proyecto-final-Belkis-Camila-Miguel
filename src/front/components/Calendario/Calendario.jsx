@@ -3,43 +3,72 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale/es";
 import Scheduler from './Citaspordia';
-import "../Calendario/Calendario.css"
+import "../Calendario/Calendario.css";
 
-function Calendario() {
+function Calendario({ onAgregarPaciente, onEliminarPaciente }) {
+
     const [startDate, setStartDate] = useState(new Date());
 
     const manejarSeleccionDia = (date) => {
         setStartDate(date);
-        // Aquí vamos cargar datos de una API, yo diria que la de calendly pero tendriamos que verlo
-        console.log("Cargando observaciones para:", date);
+    };
+
+    const agregarCita = () => {
+        const nuevaCita = {
+            id: Date.now(),
+            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            nombre: "Carlos López",
+            motivo: "Control"
+        };
+
+        onAgregarPaciente(nuevaCita);
     };
 
     return (
-        <div className=" mt-4">
+        <div className="mt-4">
             <div className="d-flex gap-3 align-items-start">
-                
+
                 <div className="card border-0 shadow-sm flex-grow-1">
                     <div className="card-body">
                         <h6 className="card-title text-muted">
-                            <strong>{startDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+                            <strong>
+                                {startDate.toLocaleDateString('es-ES', {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric'
+                                })}
+                            </strong>
                         </h6>
+
                         <hr />
+
                         <div className="mt-2">
-                          
-                            <p className="text-secondary">CITAS DE HOY</p>
-                            <Scheduler fechaSeleccionada={startDate} />
-                            <textarea 
-                                className="form-control border-0 bg-light" 
-                                rows="2" 
+                            <p className="text-secondary">CITAS</p>
+
+                            <Scheduler
+                                fechaSeleccionada={startDate}
+                                onAgregarPaciente={onAgregarPaciente}
+                                onEliminarPaciente={onEliminarPaciente}
+                            />
+
+                            <textarea
+                                className="form-control border-0 bg-light"
+                                rows="2"
                                 placeholder="Escribir nueva observación..."
                             ></textarea>
+
                         </div>
                     </div>
                 </div>
 
-
                 <div className='contenedor-calendario shadow-sm bg-white p-2 rounded'>
-                    <DatePicker selected={startDate} onChange={manejarSeleccionDia} inline locale={es} outsideClickIgnoreClass="react-datepicker__day--outside-month"/>
+                    <DatePicker
+                        selected={startDate}
+                        onChange={manejarSeleccionDia}
+                        inline
+                        locale={es}
+                        outsideClickIgnoreClass="react-datepicker__day--outside-month"
+                    />
                 </div>
             </div>
         </div>
