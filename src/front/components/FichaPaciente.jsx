@@ -43,7 +43,7 @@ export const FichaPaciente = () => {
         if (glucosaVal > 180) {
             alertas.push({
                 msg: `GLUCOSA ALTA: ${glucosaVal} mg/dL`,
-                color: "#fd7e14", 
+                color: "#fd7e14",
                 icon: "fa-droplet",
                 prot: "Riesgo de infección y retraso en cicatrización. Valorar profilaxis antibiótica."
             });
@@ -54,7 +54,7 @@ export const FichaPaciente = () => {
         if (oxygen > 0 && oxygen < 94) {
             alertas.push({
                 msg: `SpO2 BAJA: ${oxygen}%`,
-                color: "#ffc107", 
+                color: "#ffc107",
                 icon: "fa-lungs",
                 prot: "Saturación de oxígeno por debajo del nivel óptimo. Precaución en procedimientos largos."
             });
@@ -113,27 +113,33 @@ export const FichaPaciente = () => {
                 </button>
             </div>
 
-            <div className="sticky-top" style={{ zIndex: 1050, top: '10px', pointerEvents: 'none' }}>
-                {alertasCriticas.map((alerta, index) => (
-                    <div
-                        key={index}
-                        className="alert d-flex align-items-center border-0 shadow-lg mb-2 text-white mi-alerta-viva"
-                        title={alerta.prot || "Ver protocolo de seguridad"}
-                        style={{
-                            backgroundColor: alerta.color,
-                            borderRadius: "12px",
-                            cursor: "help",
-                            pointerEvents: 'auto'
-                        }}
-                    >
-                        <i className={`fas ${alerta.icon} me-3 fa-lg`}></i>
-                        <div>
-                            <small className="d-block opacity-75" style={{ fontSize: '0.6rem', fontWeight: 'bold' }}>AVISO MÉDICO CRÍTICO</small>
-                            <strong className="text-uppercase" style={{ fontSize: '0.9rem' }}>{alerta.msg}</strong>
+            <div className="sticky-top pt-2" style={{ zIndex: 1050, top: '10px', pointerEvents: 'none' }}>
+                <div className="d-flex flex-wrap gap-3 justify-content-center">
+                    {alertasCriticas.map((alerta, index) => (
+                        <div
+                            key={index}
+                            className="alert d-flex align-items-center border-0 shadow-lg m-0 text-white mi-alerta-viva"
+                            title={alerta.prot}
+                            style={{
+                                backgroundColor: alerta.color,
+                                borderRadius: "14px",
+                                cursor: "help",
+                                pointerEvents: 'auto',
+                                padding: '12px 20px',      // Un poco más de aire interno
+                                minWidth: '280px',         // Tamaño más robusto
+                                flex: '0 1 auto',          // Crece según el contenido
+                                borderBottom: '4px solid rgba(0,0,0,0.2)' // Efecto de relieve
+                            }}
+                        >
+                            <i className={`fas ${alerta.icon} me-3 fa-lg`}></i>
+                            <div style={{ lineHeight: '1.2' }}>
+                                <small className="d-block opacity-75" style={{ fontSize: '0.65rem', fontWeight: 'bold', letterSpacing: '0.5px' }}>AVISO MÉDICO</small>
+                                <strong className="text-uppercase" style={{ fontSize: '0.9rem' }}>{alerta.msg}</strong>
+                            </div>
+                            <i className="fas fa-info-circle ms-auto ps-3 opacity-50"></i>
                         </div>
-                        <i className="fas fa-info-circle ms-auto opacity-50"></i>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
 
             {/* CABECERA DE IDENTIDAD CON DATOS REALES */}

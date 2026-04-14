@@ -209,7 +209,8 @@ export default function Healthform() {
       preguntas: [
         { q: "¿Padece o ha pasado Cáncer?", name: "cancer", textarea: true },
         { q: "¿Ha recibido Radiación?", name: "radiacion", textarea: true },
-        { q: "¿Fuma o ingiere alcohol?", name: "habitos" },
+        { q: "¿Es fumador?", name: "habitos" },
+        { q: "¿Consume alcohol?", name: "habitos" },
       ]
     },
     {
