@@ -25,8 +25,8 @@
 
 .alerta-critica {
   animation: alert-pulse 2s infinite ease-in-out;
-  border-left: 6px solid #dc3545 !important; /* Rojo intenso */
-  background-color: rgba(220, 53, 69, 0.15) !important; /* Fondo rojizo suave */
+  border-left: 6px solid #dc3545 !important; 
+  background-color: rgba(220, 53, 69, 0.15) !important; 
 }
 
 .mi-alerta-viva {
@@ -37,4 +37,90 @@
     0% { transform: scale(1); opacity: 1; }
     50% { transform: scale(0.95); opacity: 0.8; }
     100% { transform: scale(1); opacity: 1; }
+}
+
+@media print {
+  
+    .d-print-block {
+        page-break-inside: avoid; /* No partir la firma */
+        break-inside: avoid;
+        margin-top: 50px !important; 
+        display: block !important;
+    }
+
+     @page {
+        margin: 2cm; 
+    }
+
+    .flex-grow-1 {
+        background-image: none !important;
+        background-color: white !important;
+    }
+
+     main.p-4 {
+        padding: 0 !important;
+    }
+
+    .sidebar, .navbar, .btn, .d-print-none, .sticky-top, 
+    button, .mb-3, .alert, .badge {
+        display: none !important;
+    }
+    
+    body {
+        background-color: white !important;
+        color: #000 !important;
+        font-family: "Times New Roman", serif; /* Fuente más formal para informes */
+        margin: 0;
+        padding: 0;
+    }
+
+    .container-fluid {
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .card {
+        border: none !important;
+        border-bottom: 1px solid #ccc !important; 
+        box-shadow: none !important;
+        background-color: white !important;
+        margin-bottom: 1.5rem !important;
+        break-inside: avoid; 
+    }
+
+    .card-header {
+        background-color: transparent !important;
+        color: #000 !important;
+        font-weight: bold !important;
+        text-transform: uppercase;
+        border-bottom: 2px solid #000 !important;
+        padding-left: 0 !important;
+    }
+   
+    textarea, .form-control {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        font-size: 11pt !important;
+        height: auto !important;
+    }
+    
+    .container-fluid::before {
+        content: "CENTRO MÉDICO GECAP - INFORME CLÍNICO OFICIAL";
+        display: block;
+        text-align: center;
+        font-size: 14pt;
+        font-weight: bold;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px double #000;
+    }
+
+     .d-print-block {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        display: block !important;
+        position: relative;
+    }
 }
