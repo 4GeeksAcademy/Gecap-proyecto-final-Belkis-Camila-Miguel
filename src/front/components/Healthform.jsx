@@ -3,40 +3,35 @@ import useGlobalReducer from "../hooks/useGlobalReducer";
 import { useNavigate } from "react-router-dom";
 
 // --- COMPONENTES AUXILIARES ---
-const InputFloatingFlex = ({ label, name, type = "text", icon, onChange, accentColor, colSize = "col-md-4", value, required = false, warning }) => (
+const InputFloatingFlex = ({ label, name, type = "text", icon, onChange, accentColor, colSize = "col-md-4", value, required = false }) => (
   <div className={`${colSize} mb-2`}>
-    {/* El title aquí genera el mensaje al pasar el cursor */}
-    <div className="form-floating shadow-sm" title={warning || ""}>
+    <div className="form-floating shadow-sm">
       <input
         type={type}
         name={name}
-        className={`form-control border-0 bg-light text-dark ${warning ? 'is-invalid border-start border-danger border-3' : ''}`}
+        className="form-control border-0 bg-light text-dark"
         placeholder={label}
         onChange={onChange}
         value={value || ""}
         required={required}
         style={{ fontSize: '0.9rem' }}
       />
-      <label className={`small ${warning ? 'text-danger fw-bold' : 'text-muted'}`}>
-        <i className={`${icon} me-2`} style={{ color: warning ? '#dc3545' : accentColor }}></i>
+      <label className="text-muted small">
+        <i className={`${icon} me-2`} style={{ color: accentColor }}></i>
         {label} {required && <span className="text-danger">*</span>}
-        {warning && <i className="fas fa-exclamation-triangle ms-1"></i>}
       </label>
     </div>
   </div>
 );
 
-const CompactQuestion = ({ q, name, hasText, onChange, accentColor, warning, value }) => (
-  <div className={`py-2 border-bottom ${warning ? 'bg-danger bg-opacity-10' : 'border-light'}`} title={warning || ""}>
+const CompactQuestion = ({ q, name, hasText, onChange, accentColor }) => (
+  <div className="py-2 border-bottom border-light">
     <div className="d-flex align-items-center justify-content-between">
-      <span className={`small fw-semibold ${warning ? 'text-danger' : 'text-secondary'}`}>
-        {warning && <i className="fas fa-exclamation-triangle me-1"></i>}
-        {q}
-      </span>
+      <span className="small fw-semibold text-secondary">{q}</span>
       <div className="btn-group btn-group-sm ms-3 shadow-sm" style={{ borderRadius: '20px', overflow: 'hidden' }}>
-        <input type="radio" className="btn-check" name={name} id={`${name}-si`} value="SI" checked={value === "SI"} onChange={onChange} />
-        <label className={`btn ${warning ? 'btn-danger' : 'btn-outline-success'} border-0 px-3`} htmlFor={`${name}-si`}>SÍ</label>
-        <input type="radio" className="btn-check" name={name} id={`${name}-no`} value="NO" checked={value === "NO"} onChange={onChange} />
+        <input type="radio" className="btn-check" name={name} id={`${name}-si`} value="SI" onChange={onChange} />
+        <label className="btn btn-outline-success border-0 px-3" htmlFor={`${name}-si`}>SÍ</label>
+        <input type="radio" className="btn-check" name={name} id={`${name}-no`} value="NO" onChange={onChange} />
         <label className="btn btn-outline-secondary border-0 px-3" htmlFor={`${name}-no`}>NO</label>
       </div>
     </div>
@@ -65,9 +60,6 @@ export default function Healthform() {
     salud: "NO", hipertension: "NO", corazon: "NO", medicamento: "NO",
     diabetes: "NO", rinones: "NO", higado: "NO", pulmon: "NO",
     cancer: "NO", radiacion: "NO", habitos: "NO",
-    hepatitis: "NO", tuberculosis: "NO", vih: "NO",
-    radiacion_cabeza: "NO", osteoporosis: "NO",
-    glucosa: "", embarazo: "NO", spo2: "", grupoSanguineo: "",
 
     // CAMPOS ESPECÍFICOS DE ALERGIAS
     alergia: "NO",
@@ -176,12 +168,6 @@ export default function Healthform() {
   if (infoIMC.valor !== "--" && parseFloat(infoIMC.valor) > 35) {
     alertasActivas.push({ msg: `RIESGO: IMC ELEVADO (${infoIMC.valor})`, color: "warning", icon: "fa-weight" });
   }
-  if (formData.hepatitis === "SI") alertasActivas.push({ msg: "PROTOCOLO: HEPATITIS", color: "danger", icon: "fa-virus" });
-  if (formData.tuberculosis === "SI") alertasActivas.push({ msg: "PROTOCOLO: TUBERCULOSIS", color: "danger", icon: "fa-lungs" });
-  if (formData.vih === "SI") alertasActivas.push({ msg: "PROTOCOLO: VIH+", color: "danger", icon: "fa-biohazard" });
-  if (formData.osteoporosis === "SI") alertasActivas.push({ msg: "ATENCIÓN: BIFOSFONATOS (RIESGO NECROSIS)", color: "warning", icon: "fa-bone" });
-  if (formData.radiacion_cabeza === "SI") alertasActivas.push({ msg: "ANTECEDENTE: RADIACIÓN CABEZA/CUELLO", color: "warning", icon: "fa-radiation" });
-
   const secciones = [
     {
       titulo: "Estado General y Cardiovascular",
@@ -255,24 +241,6 @@ export default function Healthform() {
 
         {/* ALERTAS DIRECTAS */}
         <div className="mb-4">
-          {formData.embarazo === "SI" && (
-            <div className="alert alert-danger border-0 shadow mi-alerta-viva d-flex align-items-center mb-2">
-              <i className="fas fa-baby me-3 fa-2xl"></i>
-              <div>
-                <div className="fw-bold text-uppercase small" style={{ letterSpacing: '1px' }}>Condición Crítica Detectada</div>
-                <div className="fw-bold h5 mb-0">PACIENTE EMBARAZADA: PROHIBIDO Rx Y REVISAR FÁRMACOS</div>
-              </div>
-            </div>
-          )}
-          {formData.glucosa > 200 && (
-            <div className="alert alert-warning border-0 shadow d-flex align-items-center mb-2" style={{ borderLeft: '5px solid #ffc107' }}>
-              <i className="fas fa-droplet me-3 fa-2xl text-danger"></i>
-              <div>
-                <div className="fw-bold text-uppercase small" style={{ letterSpacing: '1px' }}>Alerta Metabólica</div>
-                <div className="fw-bold mb-0">HIPERGLUCEMIA DETECTADA: {formData.glucosa} mg/dL (Riesgo Quirúrgico)</div>
-              </div>
-            </div>
-          )}
           {(formData.alergia_penicilina === "SI" ||
             formData.alergia_terramicina === "SI" ||
             formData.alergia_anestesia === "SI" ||
@@ -309,10 +277,13 @@ export default function Healthform() {
         <div className="card border-0 shadow-sm mb-4 rounded-4 bg-white p-4 border-top border-4" style={{ borderColor: "#17a2b8" }}>
           <h6 className="fw-bold mb-4" style={{ color: "#17a2b8" }}><i className="fas fa-id-card me-2"></i>DATOS PERSONALES</h6>
           <div className="row g-2">
+
+            {/* FILA 1: Identidad (4+4+4 = 12) */}
             <InputFloatingFlex label="Nombre" name="nombre" value={formData.nombre} icon="fas fa-user" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-4" required={true} />
             <InputFloatingFlex label="Apellidos" name="apellidos" value={formData.apellidos} icon="fas fa-users" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-4" required={true} />
             <InputFloatingFlex label="DNI / NIE" name="dni" value={formData.dni} icon="fas fa-id-card" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-4" required={true} />
 
+            {/* FILA 2: Tiempos y Contacto (2+2+3+5 = 12) */}
             <div className="col-md-2 mb-2">
               <div className="form-floating shadow-sm">
                 <input type="text" className="form-control border-0 bg-info-subtle fw-bold text-info" value={formData.edad} readOnly />
@@ -327,53 +298,15 @@ export default function Healthform() {
             </div>
             <InputFloatingFlex label="Teléfono" name="telefono" type="tel" value={formData.telefono} icon="fas fa-phone" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-3" required={true} />
             <InputFloatingFlex label="Email" name="email" type="email" value={formData.email} icon="fas fa-envelope" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-5" required={true} />
+
+            {/* FILA 3: Ubicación Principal (12) */}
             <InputFloatingFlex label="Dirección" name="direccion" value={formData.direccion} icon="fas fa-map-marker-alt" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-12" />
+
+            {/* FILA 4: Detalles Postales (5+4+3 = 12) */}
             <InputFloatingFlex label="Ciudad" name="ciudad" value={formData.ciudad} icon="fas fa-city" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-5" />
             <InputFloatingFlex label="País" name="pais" value={formData.pais} icon="fas fa-globe-americas" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-4" />
             <InputFloatingFlex label="CP" name="cp" value={formData.cp} icon="fas fa-mail-bulk" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-3" />
-          </div>
-        </div>
 
-        <div className="card border-0 shadow-sm mb-4 rounded-4 border-top border-4 bg-white" style={{ borderColor: "#6f42c1" }}>
-          <div className="card-body p-4">
-            <h6 className="fw-bold mb-4" style={{ color: "#6f42c1" }}>
-              <i className="fas fa-biohazard me-2"></i>RIESGOS MÉDICOS Y BIOSEGURIDAD
-            </h6>
-            <div className="row g-3">
-              {[
-                { name: "hepatitis", label: "HEPATITIS", msg: "Riesgo biológico. Protocolo de esterilización reforzado." },
-                { name: "tuberculosis", label: "TUBERCULOSIS", msg: "Contagio por aire. Uso de mascarilla FFP3 obligatorio." },
-                { name: "vih", label: "VIH", msg: "Paciente inmunodeprimido. Vigilancia de infecciones." },
-                { name: "osteoporosis", label: "OSTEOPOROSIS / BIFOSFONATOS", msg: "¡ALERTA! Riesgo de osteonecrosis en cirugía/extracciones." },
-                { name: "radiacion_cabeza", label: "RADIACIÓN CABEZA/CUELLO", msg: "Antecedente de radioterapia: fragilidad ósea y xerostomía." },
-                { name: "cancer", label: "CÁNCER (ACTIVO/ANTECEDENTE)", msg: "Evaluar estado general y medicación oncológica." },
-                { name: "embarazo", label: "EMBARAZO", msg: "¡CRÍTICO! Paciente embarazada. Prohibido radiografías sin protección/justificación y verificar fármacos." },
-              ].map((item) => {
-                const activo = formData[item.name] === "SI"; // Definimos la condición
-
-                return (
-                  <div className="col-md-6 col-lg-4" key={item.name}>
-                    <div
-                      /* Aplicamos la misma clase que usamos en alergias */
-                      className={`d-flex align-items-center justify-content-between p-3 rounded-3 shadow-sm ${activo ? 'mi-alerta-viva' : 'bg-light border'}`}
-                      title={activo ? item.msg : "Sin riesgo reportado"}
-                      style={{ cursor: activo ? 'help' : 'default', transition: 'all 0.3s' }}
-                    >
-                      <span className={`small fw-bold ${activo ? 'text-danger' : 'text-secondary'}`}>
-                        {activo && <i className="fas fa-biohazard me-2"></i>}
-                        {item.label}
-                      </span>
-                      <div className="btn-group btn-group-sm">
-                        <input type="radio" className="btn-check" name={item.name} id={`${item.name}-si`} value="SI" onChange={handleInputChange} checked={formData[item.name] === "SI"} />
-                        <label className={`btn ${activo ? 'btn-danger' : 'btn-outline-danger'} border-0 px-3`} htmlFor={`${item.name}-si`}>SÍ</label>
-                        <input type="radio" className="btn-check" name={item.name} id={`${item.name}-no`} value="NO" onChange={handleInputChange} checked={formData[item.name] === "NO"} />
-                        <label className="btn btn-outline-secondary border-0 px-3" htmlFor={`${item.name}-no`}>NO</label>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
           </div>
         </div>
 
@@ -393,64 +326,25 @@ export default function Healthform() {
               </button>
             </div>
             <div className="row g-3">
-
-              <style>
-                {`@keyframes parpadeo-urgente { 0% { background-color: rgba(220, 53, 69, 0.1); transform: scale(1); } 50% { background-color: rgba(220, 53, 69, 0.3); transform: scale(0.98); }
-                  100% { background-color: rgba(220, 53, 69, 0.1); transform: scale(1); }}.mi-alerta-viva 
-                  { animation: parpadeo-urgente 1.5s 
-                   infinite ease-in-out !important; 
-                   border: 2px solid #dc3545 !important; 
-                   }
-               `}
-              </style>
-
               {[
                 { id: "pen", name: "alergia_penicilina", label: "PENICILINA" },
                 { id: "ter", name: "alergia_terramicina", label: "TERRAMICINA" },
                 { id: "anes", name: "alergia_anestesia", label: "ANESTESIA" },
                 { id: "lat", name: "alergia_latex", label: "LÁTEX" },
                 { id: "aine", name: "alergia_aines", label: "AINEs / ASPIRINA" },
-              ].map((alg) => {
-                const esCritico = formData[alg.name] === "SI";
-
-                return (
-                  <div className="col-md-4" key={alg.id}>
-                    <div
-                      className={`d-flex align-items-center justify-content-between p-3 rounded-3 shadow-sm ${esCritico ? 'mi-alerta-viva' : 'bg-light border'}`}
-                      title={esCritico ? `¡ALERTA CRÍTICA! Paciente alérgico a: ${alg.label}` : ""}
-                      style={{ cursor: esCritico ? 'help' : 'default', transition: 'all 0.3s' }}
-                    >
-                      <span className={`small fw-bold ${esCritico ? 'text-danger' : 'text-dark'}`}>
-                        {esCritico && <i className="fas fa-exclamation-triangle me-2"></i>}
-                        {alg.label}
-                      </span>
-                      <div className="btn-group btn-group-sm">
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name={alg.name}
-                          id={`${alg.id}-si`}
-                          value="SI"
-                          onChange={handleInputChange}
-                          checked={formData[alg.name] === "SI"}
-                        />
-                        <label className={`btn ${esCritico ? 'btn-danger' : 'btn-outline-danger'} border-0 px-3`} htmlFor={`${alg.id}-si`}>SÍ</label>
-
-                        <input
-                          type="radio"
-                          className="btn-check"
-                          name={alg.name}
-                          id={`${alg.id}-no`}
-                          value="NO"
-                          onChange={handleInputChange}
-                          checked={formData[alg.name] === "NO"}
-                        />
-                        <label className="btn btn-outline-secondary border-0 px-3" htmlFor={`${alg.id}-no`}>NO</label>
-                      </div>
+              ].map((alg) => (
+                <div className="col-md-4" key={alg.id}>
+                  <div className="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-light shadow-sm">
+                    <span className="small fw-bold text-dark">{alg.label}</span>
+                    <div className="btn-group btn-group-sm">
+                      <input type="radio" className="btn-check" name={alg.name} id={`${alg.id}-si`} value="SI" onChange={handleInputChange} checked={formData[alg.name] === "SI"} />
+                      <label className="btn btn-outline-danger border-0 px-3" htmlFor={`${alg.id}-si`}>SÍ</label>
+                      <input type="radio" className="btn-check" name={alg.name} id={`${alg.id}-no`} value="NO" onChange={handleInputChange} checked={formData[alg.name] === "NO"} />
+                      <label className="btn btn-outline-secondary border-0 px-3" htmlFor={`${alg.id}-no`}>NO</label>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
 
               {/* Otros */}
               <div className="col-12 mt-3">
@@ -469,115 +363,44 @@ export default function Healthform() {
 
         {/* EXPLORACIÓN FÍSICA */}
         <div className="card border-0 shadow-sm mb-4 rounded-4 border-top border-4 bg-white" style={{ borderColor: "#ffc107" }}>
-          <div className="card-body p-4">
-            <h6 className="fw-bold mb-4" style={{ color: "#ffc107" }}>
-              <i className="fas fa-stethoscope me-2"></i>EXPLORACIÓN FÍSICA Y CONSTANTES
-            </h6>
+          <div className="card-body p-4 text-dark">
+            <h6 className="fw-bold mb-4" style={{ color: "#ffc107" }}><i className="fas fa-stethoscope me-2"></i>EXPLORACIÓN FÍSICA</h6>
+            <div className="row g-3 align-items-center text-center">
+              <div className="col-md-2">
+                <label className="small fw-bold text-muted mb-1">Peso (kg)</label>
+                <input type="number" name="peso" className="form-control border-0 bg-light text-dark text-center" value={formData.peso} onChange={handleInputChange} />
+              </div>
+              <div className="col-md-2">
+                <label className="small fw-bold text-muted mb-1">Altura (cm)</label>
+                <input type="number" name="altura" className="form-control border-0 bg-light text-dark text-center" value={formData.altura} onChange={handleInputChange} />
+              </div>
+              <div className="col-md-3">
+                <div className="p-2 rounded-3 text-center shadow-sm" style={{ backgroundColor: infoIMC.color + '15', border: `1px solid ${infoIMC.color}` }}>
+                  {/* VALOR REAL DEL PACIENTE (Lo que tú introduces) */}
+                  <span className="d-block fw-bold small" style={{ color: infoIMC.color }}>IMC ACTUAL: {infoIMC.valor}</span>
+                  <small className="fw-bold d-block mb-1" style={{ color: infoIMC.color, fontSize: '0.65rem' }}>{infoIMC.label}</small>
 
-            <div className="row g-4 align-items-center">
-
-              {/* BLOQUE A: COMPOSICIÓN CORPORAL */}
-              <div className="col-lg-4 border-end border-light">
-                <div className="row g-2 text-center">
-                  <div className="col-6">
-                    <label className="small fw-bold text-muted mb-1">Peso (kg)</label>
-                    <input type="number" name="peso" className="form-control border-0 bg-light text-center" value={formData.peso} onChange={handleInputChange} />
-                  </div>
-                  <div className="col-6">
-                    <label className="small fw-bold text-muted mb-1">Altura (cm)</label>
-                    <input type="number" name="altura" className="form-control border-0 bg-light text-center" value={formData.altura} onChange={handleInputChange} />
-                  </div>
-                  <div className="col-12 mt-2">
-                    <div className="p-2 rounded-3 text-center shadow-sm" style={{ backgroundColor: infoIMC.color + '15', border: `1px solid ${infoIMC.color}` }}>
-                      <span className="fw-bold small" style={{ color: infoIMC.color }}>IMC: {infoIMC.valor} ({infoIMC.label})</span>
+                  {/* VALORES NORMALES ESTIMADOS (La referencia médica) */}
+                  {infoIMC.valor !== "--" && (
+                    <div className="mt-1 pt-1 border-top border-secondary-subtle">
+                      <small className="text-muted d-block" style={{ fontSize: '0.6rem', lineHeight: '1.1' }}>
+                        VALORES NORMALES:
+                      </small>
+                      <strong className="text-dark" style={{ fontSize: '0.7rem' }}>
+                        {infoIMC.ideal}
+                      </strong>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
-              {/* BLOQUE B: SIGNOS VITALES CRÍTICOS */}
-              <div className="col-lg-8">
-                <div className="row g-3 text-center">
-
-                  {/* GRUPO SANGUÍNEO */}
-                  <div className="col-md-4">
-                    <label className="small fw-bold text-muted mb-1 d-block">Grupo Sanguíneo</label>
-                    <select
-                      name="grupoSanguineo"
-                      className="form-select border-0 bg-light text-center fw-bold"
-                      value={formData.grupoSanguineo}
-                      onChange={handleInputChange}
-                      style={{ fontSize: '0.9rem', height: '38px' }}
-                    >
-                      <option value="">--</option>
-                      <option value="A+">A+</option>
-                      <option value="A-">A-</option>
-                      <option value="B+">B+</option>
-                      <option value="B-">B-</option>
-                      <option value="AB+">AB+</option>
-                      <option value="AB-">AB-</option>
-                      <option value="O+">O+</option>
-                      <option value="O-">O-</option>
-                    </select>
-                  </div>
-
-                  {/* TENSIÓN */}
-                  <div className="col-md-4">
-                    <label className="small fw-bold text-muted mb-1 d-block">Tensión Art.</label>
-                    <input
-                      type="text"
-                      name="tension"
-                      className={`form-control border-0 text-center fw-bold ${parseInt(formData.tension) > 140 ? 'bg-danger text-white' : 'bg-light'}`}
-                      placeholder="120/80"
-                      onChange={handleInputChange}
-                      style={{ height: '38px' }}
-                    />
-                  </div>
-
-                  {/* FRECUENCIA */}
-                  <div className="col-md-4">
-                    <label className="small fw-bold text-muted mb-1 d-block">Frec. Card.</label>
-                    <input
-                      type="number"
-                      name="frecuencia"
-                      className="form-control border-0 bg-light text-center fw-bold"
-                      placeholder="72"
-                      onChange={handleInputChange}
-                      style={{ height: '38px' }}
-                    />
-                  </div>
-
-                  {/* GLUCOSA */}
-                  <div className="col-md-4">
-                    <label className="small fw-bold text-muted mb-1 d-block">Glucosa (mg/dL)</label>
-                    <input
-                      type="number"
-                      name="glucosa"
-                      className={`form-control border-0 text-center fw-bold ${formData.glucosa > 180 ? 'alerta-critica text-danger' : 'bg-light'}`}
-                      value={formData.glucosa}
-                      onChange={handleInputChange}
-                      placeholder="90"
-                      style={{ height: '38px' }}
-                    />
-                  </div>
-
-                  {/* SpO2 */}
-                  <div className="col-md-4">
-                    <label className="small fw-bold text-muted mb-1 d-block">Saturación O2</label>
-                    <input
-                      type="number"
-                      name="spo2"
-                      className={`form-control border-0 text-center fw-bold ${formData.spo2 < 94 && formData.spo2 > 0 ? 'bg-warning-subtle text-warning' : 'bg-light'}`}
-                      value={formData.spo2}
-                      onChange={handleInputChange}
-                      placeholder="98%"
-                      style={{ height: '38px' }}
-                    />
-                  </div>
-
-                  <div className="col-md-4"></div>
-
-                </div>
+              <div className="col-md-3">
+                <label className="small fw-bold text-muted mb-1">Tensión</label>
+                <input type="text" name="tension" className="form-control border-0 bg-light text-dark text-center" placeholder="120/80" onChange={handleInputChange} />
+              </div>
+              <div className="col-md-2">
+                <label className="small fw-bold text-muted mb-1">Frec. Card.</label>
+                <input type="number" name="frecuencia" className="form-control border-0 bg-light text-dark text-center" placeholder="72" onChange={handleInputChange} />
               </div>
             </div>
           </div>

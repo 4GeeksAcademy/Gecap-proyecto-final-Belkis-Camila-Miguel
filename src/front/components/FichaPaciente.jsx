@@ -29,63 +29,15 @@ export const FichaPaciente = () => {
 
     const detectarAlertas = () => {
         let alertas = [];
-        if (p.embarazo === "SI") {
-            alertas.push({
-                msg: "ALERTA: PACIENTE EMBARAZADA",
-                color: "#dc3545",
-                icon: "fa-baby",
-                prot: "¡CRÍTICO! Prohibido radiografías sin protección/justificación. Revisar compatibilidad de fármacos."
-            });
+        if (p.alergia_penicilina === "SI") alertas.push({ msg: "ALÉRGICO: PENICILINA", color: "#e8888c", icon: "fa-skull-crossbones" });
+        if (p.alergia_terramicina === "SI") alertas.push({ msg: "ALÉRGICO: TERRAMICINA", color: "#e8888c", icon: "fa-capsules" });
+        if (p.alergia_anestesia === "SI") alertas.push({ msg: "ALÉRGICO: ANESTESIA", color: "#e8888c", icon: "fa-syringe" });
+        if (p.alergia_latex === "SI") alertas.push({ msg: "ALÉRGICO: LÁTEX", color: "#e8888c", icon: "fa-hand-dots" });
+        if (p.alergia_aines === "SI") alertas.push({ msg: "ALÉRGICO: AINEs / ASPIRINA", color: "#e8888c", icon: "fa-pills" });
+
+        if (p.alergia_otros) {
+            alertas.push({ msg: `OTRAS ALERGIAS: ${p.alergia_otros}`, color: "#e8888c", icon: "fa-exclamation-triangle" });
         }
-
-        // Glucosa
-        const glucosaVal = parseFloat(p.glucosa);
-        if (glucosaVal > 180) {
-            alertas.push({
-                msg: `GLUCOSA ALTA: ${glucosaVal} mg/dL`,
-                color: "#fd7e14", 
-                icon: "fa-droplet",
-                prot: "Riesgo de infección y retraso en cicatrización. Valorar profilaxis antibiótica."
-            });
-        }
-
-        // Saturación de Oxígeno
-        const oxygen = parseFloat(p.spo2);
-        if (oxygen > 0 && oxygen < 94) {
-            alertas.push({
-                msg: `SpO2 BAJA: ${oxygen}%`,
-                color: "#ffc107", 
-                icon: "fa-lungs",
-                prot: "Saturación de oxígeno por debajo del nivel óptimo. Precaución en procedimientos largos."
-            });
-        }
-        const alergiasMap = [
-            { key: "alergia_penicilina", msg: "ALERGIA: PENICILINA", prot: "Riesgo de shock. No administrar derivados." },
-            { key: "alergia_terramicina", msg: "ALERGIA: TERRAMICINA", prot: "Evitar tetraciclinas." },
-            { key: "alergia_anestesia", msg: "ALERGIA: ANESTESIA", prot: "Usar alternativa sin vasoconstrictor." },
-            { key: "alergia_latex", msg: "ALERGIA: LÁTEX", prot: "Protocolo libre de látex." },
-            { key: "alergia_aines", msg: "ALERGIA: AINEs / ASPIRINA", prot: "Evitar antiinflamatorios no esteroideos." }
-        ];
-
-        alergiasMap.forEach(a => {
-            if (p[a.key] === "SI") alertas.push({ msg: a.msg, color: "#e8888c", icon: "fa-skull-crossbones", prot: a.prot });
-        });
-
-        // Riesgos Médicos y Bioseguridad
-        const riesgosMap = [
-            { key: "hepatitis", msg: "RIESGO: HEPATITIS", icon: "fa-virus", color: "#6f42c1", prot: "Protocolo biológico. Esterilización nivel 3." },
-            { key: "tuberculosis", msg: "RIESGO: TUBERCULOSIS", icon: "fa-lungs", color: "#6f42c1", prot: "Transmisión aérea. Mascarilla FFP3." },
-            { key: "vih", msg: "RIESGO: VIH+", icon: "fa-biohazard", color: "#6f42c1", prot: "Inmunodepresión. Cuidado infecciones post-op." },
-            { key: "osteoporosis", msg: "ALERTA: BIFOSFONATOS", icon: "fa-bone", color: "#fd7e14", prot: "¡PELIGRO! Riesgo osteonecrosis en cirugía." },
-            { key: "radiacion_cabeza", msg: "ALERTA: RADIOTERAPIA", icon: "fa-radiation", color: "#fd7e14", prot: "Fragilidad ósea y xerostomía detectada." }
-        ];
-
-        riesgosMap.forEach(r => {
-            if (p[r.key] === "SI") alertas.push({ msg: r.msg, color: r.color, icon: r.icon, prot: r.prot });
-        });
-
-        if (p.alergia_otros) alertas.push({ msg: `OTRAS: ${p.alergia_otros}`, color: "#e8888c", icon: "fa-exclamation-triangle", prot: "Verificar historial" });
-
         return alertas;
     };
 
@@ -113,41 +65,20 @@ export const FichaPaciente = () => {
                 </button>
             </div>
 
-            <div className="sticky-top" style={{ zIndex: 1050, top: '10px', pointerEvents: 'none' }}>
-                {alertasCriticas.map((alerta, index) => (
-                    <div
-                        key={index}
-                        className="alert d-flex align-items-center border-0 shadow-lg mb-2 text-white mi-alerta-viva"
-                        title={alerta.prot || "Ver protocolo de seguridad"}
-                        style={{
-                            backgroundColor: alerta.color,
-                            borderRadius: "12px",
-                            cursor: "help",
-                            pointerEvents: 'auto'
-                        }}
-                    >
-                        <i className={`fas ${alerta.icon} me-3 fa-lg`}></i>
-                        <div>
-                            <small className="d-block opacity-75" style={{ fontSize: '0.6rem', fontWeight: 'bold' }}>AVISO MÉDICO CRÍTICO</small>
-                            <strong className="text-uppercase" style={{ fontSize: '0.9rem' }}>{alerta.msg}</strong>
-                        </div>
-                        <i className="fas fa-info-circle ms-auto opacity-50"></i>
-                    </div>
-                ))}
-            </div>
+            {/* ALERTAS DINÁMICAS */}
+            {alertasCriticas.map((alerta, index) => (
+                <div key={index} className="alert d-flex align-items-center border-0 shadow-sm mb-3 text-white animate__animated animate__pulse animate__infinite"
+                    style={{ backgroundColor: alerta.color, borderRadius: "12px" }}>
+                    <i className={`fas ${alerta.icon} me-3 fa-lg`}></i>
+                    <strong className="text-uppercase">{alerta.msg}</strong>
+                </div>
+            ))}
 
             {/* CABECERA DE IDENTIDAD CON DATOS REALES */}
             <div className="d-flex justify-content-between align-items-center mb-4 p-4 rounded-4 shadow-sm bg-white border-start border-5" style={{ borderColor: "#e8888c" }}>
                 <div>
                     <h2 className="mb-0 fw-bold" style={{ color: "#566873" }}>
                         {p.nombre} {p.apellidos}
-                        {p.embarazo === "SI" && (
-                            <i
-                                className="fas fa-baby ms-3 text-danger animate__animated animate__flash animate__infinite"
-                                title="¡ATENCIÓN! PACIENTE EMBARAZADA"
-                                style={{ filter: "drop-shadow(0 0 5px rgba(220, 53, 69, 0.4))" }}
-                            ></i>
-                        )}
                     </h2>
                     <div className="d-flex gap-2 mt-2">
                         <span className="badge px-3 py-2" style={{ backgroundColor: "#93bbbf" }}>Paciente Activo</span>
@@ -166,50 +97,40 @@ export const FichaPaciente = () => {
             </div>
 
             {/* WIDGETS DE CONSTANTES CON DATOS REALES */}
-            <div className="row g-3 mb-3 text-center">
-                <div className="col-md-4">
+            <div className="row g-3 mb-4">
+                {/* CAJA 1: Peso Real */}
+                <div className="col-md-3">
                     <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4" style={{ borderColor: "#93bbbf" }}>
                         <p className="small text-muted mb-0">Peso Actual</p>
                         <h5 className="fw-bold mb-0">{p.peso || "--"} kg</h5>
                     </div>
                 </div>
-                <div className="col-md-4">
+
+                {/* CAJA 2: Tensión */}
+                <div className="col-md-3">
+                    <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4" style={{ borderColor: "#b4d2d9" }}>
+                        <p className="small text-muted mb-0">Última Tensión</p>
+                        <h5 className="fw-bold mb-0">{p.tension || "--"}</h5>
+                    </div>
+                </div>
+
+                {/* CAJA 3: Edad */}
+                <div className="col-md-3">
+                    <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4" style={{ borderColor: "#ebf2f1" }}>
+                        <p className="small text-muted mb-0">Edad</p>
+                        <h5 className="fw-bold mb-0">{p.edad || "--"} años</h5>
+                    </div>
+                </div>
+
+                {/* CAJA 4: EL OBJETIVO */}
+                <div className="col-md-3">
                     <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4"
                         style={{ borderColor: saludable ? "#28a745" : "#ffc107" }}>
-                        <p className="small text-muted mb-0">Objetivo Saludable (IMC)</p>
+                        <p className="small text-muted mb-0">Objetivo Saludable</p>
                         <h5 className="fw-bold mb-0">{p.imc_ideal || "--"}</h5>
                     </div>
                 </div>
-                <div className="col-md-4">
-                    <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4" style={{ borderColor: "#566873" }}>
-                        <p className="small text-muted mb-0">Edad / Año Nac.</p>
-                        <h5 className="fw-bold mb-0">{p.edad || "--"} años <small className="text-muted" style={{ fontSize: '0.7rem' }}>({p.nacimiento})</small></h5>
-                    </div>
-                </div>
             </div>
-
-            {/* WIDGETS DE CONSTANTES (Signos Vitales Críticos) */}
-            <div className="row g-3 mb-4 text-center">
-                <div className="col-md-4">
-                    <div className={`p-3 rounded-4 bg-white shadow-sm border-bottom border-4 ${parseInt(p.tension) > 140 ? 'border-danger' : 'border-info'}`}>
-                        <p className="small text-muted mb-0">Tensión Arterial</p>
-                        <h5 className={`fw-bold mb-0 ${parseInt(p.tension) > 140 ? 'text-danger' : ''}`}>{p.tension || "--"}</h5>
-                    </div>
-                </div>
-                <div className="col-md-4">
-                    <div className={`p-3 rounded-4 bg-white shadow-sm border-bottom border-4 ${parseFloat(p.glucosa) > 180 ? 'border-danger mi-alerta-viva' : 'border-success'}`}>
-                        <p className="small text-muted mb-0">Glucosa Capilar</p>
-                        <h5 className={`fw-bold mb-0 ${parseFloat(p.glucosa) > 180 ? 'text-danger' : ''}`}>{p.glucosa || "--"} <small style={{ fontSize: '0.7rem' }}>mg/dL</small></h5>
-                    </div>
-                </div>
-                <div className="col-md-4">
-                    <div className={`p-3 rounded-4 bg-white shadow-sm border-bottom border-4 ${p.spo2 < 94 && p.spo2 > 0 ? 'border-warning' : 'border-primary'}`}>
-                        <p className="small text-muted mb-0">Saturación Oxígeno</p>
-                        <h5 className="fw-bold mb-0">{p.spo2 || "--"}% SpO2</h5>
-                    </div>
-                </div>
-            </div>
-
             <div className="row">
                 <div className="col-lg-4 mb-4">
                     <div className="card border-0 shadow-sm h-100 rounded-4 overflow-hidden">
@@ -249,30 +170,20 @@ export const FichaPaciente = () => {
                         {/* Alergias y Alertas con estilo dinámico */}
                         <div className="col-md-6 mb-4">
                             <div className="card border-0 shadow-sm h-100 rounded-4"
-                                style={{
-                                    backgroundColor: alertasCriticas.length > 0 ? "#fff5f5" : "#ebf2f1",
-                                    borderLeft: alertasCriticas.length > 0 ? "5px solid #dc3545" : "none"
-                                }}>
+                                style={{ backgroundColor: alertasCriticas.length > 0 ? "#fff5f5" : "#ebf2f1", borderLeft: alertasCriticas.length > 0 ? "5px solid #e8888c" : "none" }}>
                                 <div className="card-body">
                                     <h6 className="fw-bold mb-3" style={{ color: "#e8888c" }}>
-                                        <i className="fas fa-biohazard me-2"></i> Riesgos y Alergias
+                                        <i className="fas fa-exclamation-triangle me-2"></i> Alergias Conocidas
                                     </h6>
-                                    <div className="d-flex flex-wrap gap-1">
-                                        {alertasCriticas.length > 0 ? (
-                                            alertasCriticas.map((a, i) => (
-                                                <span
-                                                    key={i}
-                                                    className="badge text-white p-2 mi-alerta-viva"
-                                                    style={{ backgroundColor: a.color, fontSize: '0.7rem', cursor: 'help' }}
-                                                    title={a.prot}
-                                                >
-                                                    <i className={`fas ${a.icon} me-1`}></i> {a.msg}
-                                                </span>
-                                            ))
-                                        ) : (
-                                            <span className="text-muted fw-bold">Ninguna conocida</span>
-                                        )}
-                                    </div>
+                                    <p className={`mb-0 fw-bold ${alertasCriticas.length > 0 ? 'text-danger' : ''}`} style={{ fontSize: "1.1rem" }}>
+                                        {/* Listamos las alergias activas del Store */}
+                                        {[
+                                            p.alergia_penicilina === "SI" ? "Penicilina" : null,
+                                            p.alergia_terramicina === "SI" ? "Terramicina" : null,
+                                            p.alergia_anestesia === "SI" ? "Anestesia" : null,
+                                            p.alergia_otros
+                                        ].filter(Boolean).join(", ") || "Ninguna conocida"}
+                                    </p>
                                 </div>
                             </div>
                         </div>

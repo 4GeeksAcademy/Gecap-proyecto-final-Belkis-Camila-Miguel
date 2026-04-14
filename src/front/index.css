@@ -17,24 +17,3 @@
     border-color: #5e888c !important; 
 }
 
-@keyframes alert-pulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
-  50% { transform: scale(0.99); box-shadow: 0 0 10px 4px rgba(220, 53, 69, 0.2); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-}
-
-.alerta-critica {
-  animation: alert-pulse 2s infinite ease-in-out;
-  border-left: 6px solid #dc3545 !important; /* Rojo intenso */
-  background-color: rgba(220, 53, 69, 0.15) !important; /* Fondo rojizo suave */
-}
-
-.mi-alerta-viva {
-    animation: parpadeo-urgente 1.5s infinite ease-in-out !important;
-}
-
-@keyframes parpadeo-urgente {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(0.95); opacity: 0.8; }
-    100% { transform: scale(1); opacity: 1; }
-}
