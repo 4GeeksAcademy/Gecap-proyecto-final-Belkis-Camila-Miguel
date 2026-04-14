@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from "date-fns/locale/es";
-import Scheduler from './Citaspordia';
+import CitasPorDia from './Citaspordia';
 import "../Calendario/Calendario.css";
+
 
 function Calendario({ onAgregarPaciente, onEliminarPaciente }) {
 
@@ -45,7 +46,7 @@ function Calendario({ onAgregarPaciente, onEliminarPaciente }) {
                         <div className="mt-2">
                             <p className="text-secondary">CITAS</p>
 
-                            <Scheduler
+                            <CitasPorDia
                                 fechaSeleccionada={startDate}
                                 onAgregarPaciente={onAgregarPaciente}
                                 onEliminarPaciente={onEliminarPaciente}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { DayPilot, DayPilotCalendar } from "@daypilot/daypilot-lite-react";
 
 
-const Scheduler = ({ fechaSeleccionada, onAgregarPaciente, onEliminarPaciente }) => {
+const CitasPorDia = ({ fechaSeleccionada, onAgregarPaciente, onEliminarPaciente }) => {
 
     const [calendar, setCalendar] = useState(null);
     const [misCitas, setMisCitas] = useState([]);
@@ -95,4 +95,4 @@ return (
 );
 };
 
-export default Scheduler;
+export default CitasPorDia;
