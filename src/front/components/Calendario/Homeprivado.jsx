@@ -1,6 +1,7 @@
 import React from 'react';
 import Calendario from "./Calendario";
 import { useState } from 'react';
+import DoctorScheduleBar from "../DoctorScheduleBar/DoctorScheduleBar";
 
 function Homeprivado() {
     // Estos datos los tenemos que cambiar por los de nuestra base de datos, solo spon de ejemplo
@@ -14,6 +15,10 @@ function Homeprivado() {
     };
     return (
         <div className="container-fluid p-4" style={{ minHeight: "100vh" }}>
+
+            <div className="mb-4">
+                <DoctorScheduleBar />
+            </div>
 
             <div className="row mb-4 g-3">
                 <div className="col-lg-9">
