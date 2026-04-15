@@ -187,10 +187,10 @@ export default function Healthform() {
       titulo: "Estado General y Cardiovascular",
       color: "#007bff",
       preguntas: [
-        { q: "¿Goza de buena salud?", name: "salud" },
+        { q: "¿Goza de buena salud?", name: "salud_buena" }, // Cambiado
         { q: "¿Sufre de hipertensión arterial?", name: "hipertension" },
-        { q: "¿Sufre enfermedad del corazón?", name: "corazon", textarea: true },
-        { q: "¿Toma algún medicamento?", name: "medicamento", textarea: true },
+        { q: "¿Sufre enfermedad del corazón?", name: "enfermedad_corazon", textarea: true },
+        { q: "¿Toma algún medicamento?", name: "medicamentos_actuales", textarea: true },
       ]
     },
     {
@@ -209,8 +209,8 @@ export default function Healthform() {
       preguntas: [
         { q: "¿Padece o ha pasado Cáncer?", name: "cancer", textarea: true },
         { q: "¿Ha recibido Radiación?", name: "radiacion", textarea: true },
-        { q: "¿Es fumador?", name: "habitos" },
-        { q: "¿Consume alcohol?", name: "habitos" },
+        { q: "¿Es fumador/a?", name: "fumador" }, // Único
+        { q: "¿Consume alcohol?", name: "alcohol" }, // Único
       ]
     },
     {
@@ -591,7 +591,15 @@ export default function Healthform() {
               <div className="card border-0 shadow-sm h-100 rounded-4 bg-white p-3 border-top border-4" style={{ borderColor: sec.color }}>
                 <h6 className="fw-bold mb-3 small text-uppercase" style={{ color: sec.color }}>{sec.titulo}</h6>
                 {sec.preguntas.map((p, i) => (
-                  <CompactQuestion key={i} q={p.q} name={p.name} hasText={p.textarea} onChange={handleInputChange} accentColor={sec.color} />
+                  <CompactQuestion
+                    key={i}
+                    q={p.q}
+                    name={p.name}
+                    hasText={p.textarea}
+                    value={formData[p.name]}
+                    onChange={handleInputChange}
+                    accentColor={sec.color}
+                  />
                 ))}
               </div>
             </div>
