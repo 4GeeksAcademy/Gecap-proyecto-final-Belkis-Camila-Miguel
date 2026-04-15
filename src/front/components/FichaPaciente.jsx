@@ -1,10 +1,12 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { BuscadorPacientes } from "./BuscadorPacientes";
 
 export const FichaPaciente = () => {
     const { store } = useGlobalReducer();
     const p = store.pacienteActual;
+    const navigate = useNavigate();
 
     if (!p) {
         return (
@@ -29,15 +31,63 @@ export const FichaPaciente = () => {
 
     const detectarAlertas = () => {
         let alertas = [];
-        if (p.alergia_penicilina === "SI") alertas.push({ msg: "ALÉRGICO: PENICILINA", color: "#e8888c", icon: "fa-skull-crossbones" });
-        if (p.alergia_terramicina === "SI") alertas.push({ msg: "ALÉRGICO: TERRAMICINA", color: "#e8888c", icon: "fa-capsules" });
-        if (p.alergia_anestesia === "SI") alertas.push({ msg: "ALÉRGICO: ANESTESIA", color: "#e8888c", icon: "fa-syringe" });
-        if (p.alergia_latex === "SI") alertas.push({ msg: "ALÉRGICO: LÁTEX", color: "#e8888c", icon: "fa-hand-dots" });
-        if (p.alergia_aines === "SI") alertas.push({ msg: "ALÉRGICO: AINEs / ASPIRINA", color: "#e8888c", icon: "fa-pills" });
-
-        if (p.alergia_otros) {
-            alertas.push({ msg: `OTRAS ALERGIAS: ${p.alergia_otros}`, color: "#e8888c", icon: "fa-exclamation-triangle" });
+        if (p.embarazo === "SI") {
+            alertas.push({
+                msg: "ALERTA: PACIENTE EMBARAZADA",
+                color: "#dc3545",
+                icon: "fa-baby",
+                prot: "¡CRÍTICO! Prohibido radiografías sin protección/justificación. Revisar compatibilidad de fármacos."
+            });
         }
+
+        // Glucosa
+        const glucosaVal = parseFloat(p.glucosa);
+        if (glucosaVal > 180) {
+            alertas.push({
+                msg: `GLUCOSA ALTA: ${glucosaVal} mg/dL`,
+                color: "#fd7e14",
+                icon: "fa-droplet",
+                prot: "Riesgo de infección y retraso en cicatrización. Valorar profilaxis antibiótica."
+            });
+        }
+
+        // Saturación de Oxígeno
+        const oxygen = parseFloat(p.spo2);
+        if (oxygen > 0 && oxygen < 94) {
+            alertas.push({
+                msg: `SpO2 BAJA: ${oxygen}%`,
+                color: "#ffc107",
+                icon: "fa-lungs",
+                prot: "Saturación de oxígeno por debajo del nivel óptimo. Precaución en procedimientos largos."
+            });
+        }
+        const alergiasMap = [
+            { key: "alergia_penicilina", msg: "ALERGIA: PENICILINA", prot: "Riesgo de shock. No administrar derivados." },
+            { key: "alergia_terramicina", msg: "ALERGIA: TERRAMICINA", prot: "Evitar tetraciclinas." },
+            { key: "alergia_anestesia", msg: "ALERGIA: ANESTESIA", prot: "Usar alternativa sin vasoconstrictor." },
+            { key: "alergia_latex", msg: "ALERGIA: LÁTEX", prot: "Protocolo libre de látex." },
+            { key: "alergia_aines", msg: "ALERGIA: AINEs / ASPIRINA", prot: "Evitar antiinflamatorios no esteroideos." }
+        ];
+
+        alergiasMap.forEach(a => {
+            if (p[a.key] === "SI") alertas.push({ msg: a.msg, color: "#e8888c", icon: "fa-skull-crossbones", prot: a.prot });
+        });
+
+        // Riesgos Médicos y Bioseguridad
+        const riesgosMap = [
+            { key: "hepatitis", msg: "RIESGO: HEPATITIS", icon: "fa-virus", color: "#6f42c1", prot: "Protocolo biológico. Esterilización nivel 3." },
+            { key: "tuberculosis", msg: "RIESGO: TUBERCULOSIS", icon: "fa-lungs", color: "#6f42c1", prot: "Transmisión aérea. Mascarilla FFP3." },
+            { key: "vih", msg: "RIESGO: VIH+", icon: "fa-biohazard", color: "#6f42c1", prot: "Inmunodepresión. Cuidado infecciones post-op." },
+            { key: "osteoporosis", msg: "ALERTA: BIFOSFONATOS", icon: "fa-bone", color: "#fd7e14", prot: "¡PELIGRO! Riesgo osteonecrosis en cirugía." },
+            { key: "radiacion_cabeza", msg: "ALERTA: RADIOTERAPIA", icon: "fa-radiation", color: "#fd7e14", prot: "Fragilidad ósea y xerostomía detectada." }
+        ];
+
+        riesgosMap.forEach(r => {
+            if (p[r.key] === "SI") alertas.push({ msg: r.msg, color: r.color, icon: r.icon, prot: r.prot });
+        });
+
+        if (p.alergia_otros) alertas.push({ msg: `OTRAS: ${p.alergia_otros}`, color: "#e8888c", icon: "fa-exclamation-triangle", prot: "Verificar historial" });
+
         return alertas;
     };
 
@@ -56,38 +106,38 @@ export const FichaPaciente = () => {
 
     return (
         <div className="container-fluid py-4 bg-light min-vh-100">
+            {/* 1. NAVEGACIÓN Y ALERTAS STICKY */}
             <div className="mb-3">
-                <button
-                    className="btn btn-sm btn-outline-secondary rounded-pill"
-                    onClick={() => dispatch({ type: 'clear_patient' })}
-                >
+                <button className="btn btn-sm btn-outline-secondary rounded-pill" onClick={() => dispatch({ type: 'clear_patient' })}>
                     <i className="fas fa-chevron-left me-2"></i>Nueva Búsqueda
                 </button>
             </div>
 
-            {/* ALERTAS DINÁMICAS */}
-            {alertasCriticas.map((alerta, index) => (
-                <div key={index} className="alert d-flex align-items-center border-0 shadow-sm mb-3 text-white animate__animated animate__pulse animate__infinite"
-                    style={{ backgroundColor: alerta.color, borderRadius: "12px" }}>
-                    <i className={`fas ${alerta.icon} me-3 fa-lg`}></i>
-                    <strong className="text-uppercase">{alerta.msg}</strong>
+            <div className="sticky-top pt-2" style={{ zIndex: 1050, top: '10px', pointerEvents: 'none' }}>
+                <div className="d-flex flex-wrap gap-3 justify-content-center">
+                    {alertasCriticas.map((alerta, index) => (
+                        <div key={index} className="alert d-flex align-items-center border-0 shadow-lg m-0 text-white mi-alerta-viva" title={alerta.prot}
+                            style={{ backgroundColor: alerta.color, borderRadius: "14px", cursor: "help", pointerEvents: 'auto', padding: '12px 20px', minWidth: '280px', flex: '0 1 auto', borderBottom: '4px solid rgba(0,0,0,0.2)' }}>
+                            <i className={`fas ${alerta.icon} me-3 fa-lg`}></i>
+                            <div style={{ lineHeight: '1.2' }}>
+                                <small className="d-block opacity-75" style={{ fontSize: '0.65rem', fontWeight: 'bold' }}>AVISO MÉDICO</small>
+                                <strong className="text-uppercase" style={{ fontSize: '0.9rem' }}>{alerta.msg}</strong>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            ))}
+            </div>
 
-            {/* CABECERA DE IDENTIDAD CON DATOS REALES */}
-            <div className="d-flex justify-content-between align-items-center mb-4 p-4 rounded-4 shadow-sm bg-white border-start border-5" style={{ borderColor: "#e8888c" }}>
+            {/* 2. CABECERA DE IDENTIDAD */}
+            <div className="d-flex justify-content-between align-items-center mb-4 p-4 rounded-4 shadow-sm bg-white border-start border-5 mt-3" style={{ borderColor: "#e8888c" }}>
                 <div>
                     <h2 className="mb-0 fw-bold" style={{ color: "#566873" }}>
                         {p.nombre} {p.apellidos}
+                        {p.embarazo === "SI" && <i className="fas fa-baby ms-3 text-danger animate__animated animate__flash animate__infinite" title="EMBARAZADA"></i>}
                     </h2>
                     <div className="d-flex gap-2 mt-2">
                         <span className="badge px-3 py-2" style={{ backgroundColor: "#93bbbf" }}>Paciente Activo</span>
-                        {saludable && (
-                            <span className="badge bg-success px-3 py-2 animate__animated animate__bounceIn">
-                                <i className="fas fa-medal me-1"></i> Peso Saludable
-                            </span>
-                        )}
-                        {alertasCriticas.length > 0 && <span className="badge bg-danger px-3 py-2 uppercase">Riesgo Alérgico</span>}
+                        {saludable && <span className="badge bg-success px-3 py-2"><i className="fas fa-medal me-1"></i> Peso Saludable</span>}
                     </div>
                 </div>
                 <div className="text-end">
@@ -96,100 +146,84 @@ export const FichaPaciente = () => {
                 </div>
             </div>
 
-            {/* WIDGETS DE CONSTANTES CON DATOS REALES */}
-            <div className="row g-3 mb-4">
-                {/* CAJA 1: Peso Real */}
-                <div className="col-md-3">
+            {/* 3. WIDGETS DE CONSTANTES */}
+            <div className="row g-3 mb-3 text-center">
+                <div className="col-md-4">
                     <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4" style={{ borderColor: "#93bbbf" }}>
                         <p className="small text-muted mb-0">Peso Actual</p>
                         <h5 className="fw-bold mb-0">{p.peso || "--"} kg</h5>
                     </div>
                 </div>
-
-                {/* CAJA 2: Tensión */}
-                <div className="col-md-3">
-                    <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4" style={{ borderColor: "#b4d2d9" }}>
-                        <p className="small text-muted mb-0">Última Tensión</p>
-                        <h5 className="fw-bold mb-0">{p.tension || "--"}</h5>
-                    </div>
-                </div>
-
-                {/* CAJA 3: Edad */}
-                <div className="col-md-3">
-                    <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4" style={{ borderColor: "#ebf2f1" }}>
-                        <p className="small text-muted mb-0">Edad</p>
-                        <h5 className="fw-bold mb-0">{p.edad || "--"} años</h5>
-                    </div>
-                </div>
-
-                {/* CAJA 4: EL OBJETIVO */}
-                <div className="col-md-3">
-                    <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4"
-                        style={{ borderColor: saludable ? "#28a745" : "#ffc107" }}>
+                <div className="col-md-4">
+                    <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4" style={{ borderColor: saludable ? "#28a745" : "#ffc107" }}>
                         <p className="small text-muted mb-0">Objetivo Saludable</p>
                         <h5 className="fw-bold mb-0">{p.imc_ideal || "--"}</h5>
                     </div>
                 </div>
+                <div className="col-md-4">
+                    <div className="p-3 rounded-4 bg-white shadow-sm border-bottom border-4" style={{ borderColor: "#566873" }}>
+                        <p className="small text-muted mb-0">Edad</p>
+                        <h5 className="fw-bold mb-0">{p.edad || "--"} años</h5>
+                    </div>
+                </div>
             </div>
+
+            <div className="row g-3 mb-4 text-center">
+                <div className="col-md-4">
+                    <div className={`p-3 rounded-4 bg-white shadow-sm border-bottom border-4 ${parseInt(p.tension) > 140 ? 'border-danger' : 'border-info'}`}>
+                        <p className="small text-muted mb-0">Tensión Arterial</p>
+                        <h5 className="fw-bold mb-0">{p.tension || "--"}</h5>
+                    </div>
+                </div>
+                <div className="col-md-4">
+                    <div className={`p-3 rounded-4 bg-white shadow-sm border-bottom border-4 ${parseFloat(p.glucosa) > 180 ? 'border-danger mi-alerta-viva' : 'border-success'}`}>
+                        <p className="small text-muted mb-0">Glucosa</p>
+                        <h5 className="fw-bold mb-0">{p.glucosa || "--"} mg/dL</h5>
+                    </div>
+                </div>
+                <div className="col-md-4">
+                    <div className={`p-3 rounded-4 bg-white shadow-sm border-bottom border-4 ${p.spo2 < 94 && p.spo2 > 0 ? 'border-warning' : 'border-primary'}`}>
+                        <p className="small text-muted mb-0">Saturación O2</p>
+                        <h5 className="fw-bold mb-0">{p.spo2 || "--"}%</h5>
+                    </div>
+                </div>
+            </div>
+
+            {/* 4. INFORMACIÓN DETALLADA */}
             <div className="row">
+                {/* Lateral: Datos Personales */}
                 <div className="col-lg-4 mb-4">
                     <div className="card border-0 shadow-sm h-100 rounded-4 overflow-hidden">
                         <div className="card-header py-3 text-white border-0" style={{ backgroundColor: "#566873" }}>
                             <i className="fas fa-id-card me-2"></i> Datos Personales
                         </div>
-                        <div className="card-body bg-white text-dark">
+                        <div className="card-body bg-white">
                             <ul className="list-group list-group-flush">
-                                <li className="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-3 border-bottom">
-                                    <span className="text-muted">DNI / Identificación:</span>
-                                    <span className="fw-bold text-dark">{p?.dni || "--"}</span>
-                                </li>
-                                <li className="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-3 border-bottom">
-                                    <span className="text-muted">Email:</span>
-                                    <span className="fw-bold">{p.email}</span>
-                                </li>
-                                <li className="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-3 border-bottom">
-                                    <span className="text-muted">Nacimiento:</span>
-                                    <span>{p.nacimiento}</span>
-                                </li>
-                                <li className="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-3 border-bottom">
-                                    <span className="text-muted">Teléfono:</span>
-                                    <span style={{ color: "#e8888c", fontWeight: "bold" }}>{p.telefono}</span>
-                                </li>
-                                <li className="list-group-item border-0 px-0 py-3">
-                                    <span className="text-muted d-block mb-1">Dirección:</span>
-                                    <span className="small text-dark fw-semibold">{p.direccion}, {p.ciudad}</span>
-                                </li>
+                                <li className="list-group-item px-0 py-3 border-bottom"><span className="text-muted small d-block">Email</span><span className="fw-bold">{p.email}</span></li>
+                                <li className="list-group-item px-0 py-3 border-bottom"><span className="text-muted small d-block">Teléfono</span><span className="fw-bold" style={{ color: "#e8888c" }}>{p.telefono}</span></li>
+                                <li className="list-group-item px-0 py-3 border-0"><span className="text-muted small d-block">Dirección</span><span className="small fw-semibold">{p.direccion}, {p.ciudad}</span></li>
                             </ul>
                         </div>
                     </div>
                 </div>
 
-                {/* Columna Derecha: Información Médica Crítica */}
+                {/* Principal: Historial y Tratamiento */}
                 <div className="col-lg-8">
-                    <div className="row">
-                        {/* Alergias y Alertas con estilo dinámico */}
-                        <div className="col-md-6 mb-4">
-                            <div className="card border-0 shadow-sm h-100 rounded-4"
-                                style={{ backgroundColor: alertasCriticas.length > 0 ? "#fff5f5" : "#ebf2f1", borderLeft: alertasCriticas.length > 0 ? "5px solid #e8888c" : "none" }}>
+                    <div className="row g-3">
+                        <div className="col-md-6 mb-3">
+                            <div className="card border-0 shadow-sm h-100 rounded-4" style={{ backgroundColor: alertasCriticas.length > 0 ? "#fff5f5" : "#ebf2f1", borderLeft: alertasCriticas.length > 0 ? "5px solid #dc3545" : "none" }}>
                                 <div className="card-body">
-                                    <h6 className="fw-bold mb-3" style={{ color: "#e8888c" }}>
-                                        <i className="fas fa-exclamation-triangle me-2"></i> Alergias Conocidas
-                                    </h6>
-                                    <p className={`mb-0 fw-bold ${alertasCriticas.length > 0 ? 'text-danger' : ''}`} style={{ fontSize: "1.1rem" }}>
-                                        {/* Listamos las alergias activas del Store */}
-                                        {[
-                                            p.alergia_penicilina === "SI" ? "Penicilina" : null,
-                                            p.alergia_terramicina === "SI" ? "Terramicina" : null,
-                                            p.alergia_anestesia === "SI" ? "Anestesia" : null,
-                                            p.alergia_otros
-                                        ].filter(Boolean).join(", ") || "Ninguna conocida"}
-                                    </p>
+                                    <h6 className="fw-bold mb-3" style={{ color: "#e8888c" }}><i className="fas fa-biohazard me-2"></i> Riesgos y Alergias</h6>
+                                    <div className="d-flex flex-wrap gap-1">
+                                        {alertasCriticas.length > 0 ? alertasCriticas.map((a, i) => (
+                                            <span key={i} className="badge text-white p-2" style={{ backgroundColor: a.color, fontSize: '0.7rem' }} title={a.prot}><i className={`fas ${a.icon} me-1`}></i> {a.msg}</span>
+                                        )) : <span className="text-muted fw-bold">Ninguna conocida</span>}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Grupo Sanguíneo */}
-                        <div className="col-md-6 mb-4">
+                        <div className="col-md-6 mb-3">
                             <div className="card border-0 shadow-sm h-100 rounded-4" style={{ backgroundColor: "#b4d2d9" }}>
                                 <div className="card-body text-center d-flex flex-column justify-content-center">
                                     <h6 className="fw-bold mb-1" style={{ color: "#566873" }}>Grupo Sanguíneo</h6>
@@ -198,34 +232,57 @@ export const FichaPaciente = () => {
                             </div>
                         </div>
 
-                        {/* Historial y Acciones */}
-                        <div className="col-12">
+                        <div className="col-12 mb-3">
                             <div className="card border-0 shadow-sm rounded-4">
                                 <div className="card-header py-3 text-white border-0" style={{ backgroundColor: "#93bbbf" }}>
-                                    <i className="fas fa-history me-2"></i> Observaciones Médicas y Antecedentes
+                                    <h6 className="mb-0 fw-bold"><i className="fas fa-history me-2"></i> ANTECEDENTES MÉDICOS</h6>
                                 </div>
                                 <div className="card-body bg-white p-4">
-                                    <p className="card-text text-secondary" style={{ lineHeight: "1.6" }}>
-                                        {p.antecedentes || "Sin antecedentes registrados."}
-                                    </p>
-                                    <hr className="my-4" />
-                                    <div className="d-flex flex-wrap gap-3">
-                                        <button className="btn px-4 text-white shadow-sm" style={{ backgroundColor: "#e8888c", borderRadius: "10px" }}>Nueva Consulta</button>
-                                        <button className="btn px-4 btn-outline-secondary" style={{ borderRadius: "10px" }}>Editar Ficha</button>
+                                    <div className="p-3 rounded-3 bg-light" style={{ minHeight: "100px", borderLeft: "4px solid #93bbbf" }}>
+                                        <p className="text-secondary mb-0" style={{ lineHeight: "1.6", whiteSpace: "pre-line" }}>{p.antecedentes || "Sin antecedentes registrados."}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Historial de Evolución (Notas del Alta) */}
-                        <div className="card border-0 shadow-sm mt-4 rounded-4 overflow-hidden">
-                            <div className="card-header py-3 text-white border-0 d-flex justify-content-between align-items-center" style={{ backgroundColor: "#566873" }}>
-                                <h6 className="mb-0 fw-bold"><i className="fas fa-notes-medical me-2"></i> Notas de Ingreso / Evolución</h6>
+                        <div className="col-12 mb-3">
+                            <div className="card border-0 shadow-sm rounded-4 overflow-hidden border-start border-5" style={{ borderColor: "#5e888c" }}>
+                                <div className="card-header py-3 text-white border-0 d-flex justify-content-between align-items-center" style={{ backgroundColor: "#5e888c" }}>
+                                    <h6 className="mb-0 fw-bold"><i className="fas fa-prescription me-2"></i> PLAN DE TRATAMIENTO</h6>
+                                    <button className="btn btn-sm btn-light text-dark fw-bold rounded-pill px-3 d-print-none" onClick={() => alert("✅ Guardado")}>Confirmar y Guardar</button>
+                                </div>
+                                <div className="card-body bg-white p-4">
+                                    <textarea className="form-control border-0 bg-light p-3 fw-bold" style={{ color: "#566873", fontSize: "1.1rem", minHeight: "120px" }} defaultValue={p.tratamiento || ""} placeholder="Escriba la receta aquí..." />
+                                </div>
                             </div>
-                            <div className="card-body bg-white p-4">
-                                <p className="text-secondary" style={{ whiteSpace: "pre-line" }}>
-                                    {p.anotaciones || "No hay notas registradas para este paciente."}
-                                </p>
+                        </div>
+
+                        <div className="col-12">
+                            <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+                                <div className="card-header py-3 text-white border-0" style={{ backgroundColor: "#566873" }}>
+                                    <h6 className="mb-0 fw-bold"><i className="fas fa-notes-medical me-2"></i> NOTAS DE EVOLUCIÓN</h6>
+                                </div>
+                                <div className="card-body bg-white p-4">
+                                    <p className="text-secondary mb-4">{p.anotaciones || "No hay notas registradas."}</p>
+                                    <hr />
+                                    <div className="d-flex flex-wrap gap-3 justify-content-end d-print-none">
+                                        <button className="btn px-4 btn-outline-secondary" style={{ borderRadius: "10px" }}>Editar Ficha</button>
+                                        <button className="btn px-4 text-white" style={{ backgroundColor: "#e8888c", borderRadius: "10px" }} onClick={() => navigate("/agenda", { state: { pacienteId: p.id, nombre: p.nombre } })}>Nueva Consulta</button>
+                                        <button className="btn px-4 text-white" style={{ backgroundColor: "#566873", borderRadius: "10px" }} onClick={() => window.print()}>Generar Informe</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="d-none d-print-block w-100">                               
+                                <div style={{ height: "100px" }}></div>
+
+                                <div className="d-flex justify-content-end">
+                                    <div className="text-center" style={{ width: "300px" }}>
+                                        <div style={{ borderTop: "2px solid #000", marginBottom: "8px" }}></div>
+                                        <p className="fw-bold mb-0">Firma y Sello del Facultativo</p>
+                                        <p className="small text-muted mb-0">Nº Colegiado: ________________</p>
+                                        <p className="small">Fecha: {new Date().toLocaleDateString()}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

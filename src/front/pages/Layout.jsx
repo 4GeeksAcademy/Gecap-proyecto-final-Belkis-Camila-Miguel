@@ -8,15 +8,17 @@ import { Navbar } from "../components/Navbar";
 
 export const Layout = () => {
     const location = useLocation();
-    console.log("Ruta actual detectada:", location.pathname);
-
     const isLandingPage = location.pathname === "/" || location.pathname === "/home" || location.pathname.includes("index.html");
 
     return (
         <ScrollToTop>
             <div className="d-flex" style={{ minHeight: "100vh" }}>
 
-                {!isLandingPage && <Sidebar />}
+                {!isLandingPage && (
+                    <div className="d-print-none">
+                        <Sidebar />
+                    </div>
+                )}
 
                 <div
                     className="flex-grow-1 d-flex flex-column"
@@ -29,14 +31,14 @@ export const Layout = () => {
                         width: isLandingPage ? "100%" : "auto"
                     }}
                 >
-
-                    {isLandingPage && <Navbar />}
+                    
+                    {isLandingPage && <div className="d-print-none"><Navbar /></div>}
 
                     <main className={isLandingPage ? "" : "p-4"}>
                         <Outlet />
                     </main>
 
-                    {isLandingPage && <Footer />}
+                    {isLandingPage && <div className="d-print-none"><Footer /></div>}
                 </div>
             </div>
         </ScrollToTop>
