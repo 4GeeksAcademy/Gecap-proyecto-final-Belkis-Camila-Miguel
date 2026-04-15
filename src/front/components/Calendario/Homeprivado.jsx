@@ -17,7 +17,7 @@ function Homeprivado() {
         <div className="container-fluid p-4" style={{ minHeight: "100vh" }}>
 
             <div className="mb-4">
-                <DoctorScheduleBar />
+                <DoctorScheduleBar appointments={pacientesHoy} />
             </div>
 
             <div className="row mb-4 g-3">

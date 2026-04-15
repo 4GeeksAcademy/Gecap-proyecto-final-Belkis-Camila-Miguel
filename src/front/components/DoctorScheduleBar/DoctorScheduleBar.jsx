@@ -1,25 +1,44 @@
 import "./DoctorScheduleBar.css";
 
-function DoctorScheduleBar() {
+function DoctorScheduleBar({ appointments }) {
   const workStart = 8;
-  const workEnd = 16;
+  const workEnd = 24;
   const totalHours = workEnd - workStart;
 
-  const appointments = [
-    { id: 1, title: "Consulta general", start: 9, end: 9.5 },
-    { id: 2, title: "Pediatría", start: 11, end: 11.5 },
-    { id: 3, title: "Odontología", start: 15, end: 15.75 }
-  ];
 
   const now = new Date();
   const currentTime = now.getHours() + now.getMinutes() / 60;
+
+  const appointmentsBar = appointments.map((appointment) => {
+    let start, end;
+
+    if (appointment.start && appointment.end) {
+      const startDate = new Date(appointment.start);
+      const endDate = new Date(appointment.end);
+
+      start = startDate.getHours() + startDate.getMinutes() / 60;
+      end = endDate.getHours() + endDate.getMinutes() / 60;
+    } else {
+      const [hours, minutes] = appointment.hora.split(":").map(Number);
+      start = hours + minutes / 60;
+      end = start + 0.5;
+    }
+
+    return {
+      id: appointment.id,
+      title: appointment.motivo || "Consulta",
+      patientName: appointment.nombre,
+      start,
+      end
+    };
+  })
 
   let progress = ((currentTime - workStart) / totalHours) * 100;
 
   if (progress < 0) progress = 0;
   if (progress > 100) progress = 100;
 
-  const nextAppointment = appointments.find(
+  const nextAppointment = appointmentsBar.find(
     (appointment) => appointment.start > currentTime
   );
 
@@ -56,7 +75,7 @@ function DoctorScheduleBar() {
               {Math.round(progress)}%
             </div>
 
-            {appointments.map((appointment) => {
+            {appointmentsBar.map((appointment) => {
               const hoursFromStart = appointment.start - workStart;
               const duration = appointment.end - appointment.start;
 
@@ -76,7 +95,7 @@ function DoctorScheduleBar() {
                     left: `${left}%`,
                     width: `${width}%`
                   }}
-                  title={appointment.title}
+                  title={`${appointment.title} - ${appointment.patientName}`}
                 ></div>
               );
             })}

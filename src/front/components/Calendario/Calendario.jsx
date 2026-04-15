@@ -14,12 +14,23 @@ function Calendario({ onAgregarPaciente, onEliminarPaciente }) {
     };
 
     const agregarCita = () => {
+
         const nuevaCita = {
+            id: Date.now(),
+            hora: "23:00",
+            nombre: "Carlos López",
+            motivo: "Control"
+        };
+
+        /*const nuevaHora = new Date();
+        nuevaHora.setMinutes(nuevaHora.getMinutes() + 90);*/
+
+        /*const nuevaCita = {
             id: Date.now(),
             hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             nombre: "Carlos López",
             motivo: "Control"
-        };
+        };*/
 
         onAgregarPaciente(nuevaCita);
     };
@@ -50,6 +61,14 @@ function Calendario({ onAgregarPaciente, onEliminarPaciente }) {
                                 onAgregarPaciente={onAgregarPaciente}
                                 onEliminarPaciente={onEliminarPaciente}
                             />
+
+                            <button
+                                className="btn btn-sm mt-3 text-white"
+                                style={{ backgroundColor: "#93bbbf" }}
+                                onClick={agregarCita}
+                            >
+                                Agregar cita de prueba
+                            </button>
 
                             <textarea
                                 className="form-control border-0 bg-light"
