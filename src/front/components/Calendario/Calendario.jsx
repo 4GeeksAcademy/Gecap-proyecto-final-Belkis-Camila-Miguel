@@ -22,16 +22,6 @@ function Calendario({ onAgregarPaciente, onEliminarPaciente }) {
             motivo: "Control"
         };
 
-        /*const nuevaHora = new Date();
-        nuevaHora.setMinutes(nuevaHora.getMinutes() + 90);*/
-
-        /*const nuevaCita = {
-            id: Date.now(),
-            hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            nombre: "Carlos López",
-            motivo: "Control"
-        };*/
-
         onAgregarPaciente(nuevaCita);
     };
 

@@ -58,14 +58,7 @@ const Scheduler = ({ fechaSeleccionada, onAgregarPaciente, onEliminarPaciente })
                 end: args.end
                 
             });
-            /*onAgregarPaciente({
-                id: nuevaCita.id,
-                hora: new Date(args.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                nombre: modal.result,
-                motivo: "Consulta",
-                start: args.start,
-                end: args.end
-            });*/
+            
         },
 
         onBeforeEventRender: args => {
