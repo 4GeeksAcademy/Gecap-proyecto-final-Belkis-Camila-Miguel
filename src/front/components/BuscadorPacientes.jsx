@@ -14,7 +14,7 @@ export const BuscadorPacientes = () => {
     );
 
     const seleccionar = (paciente) => {
-        dispatch({ type: 'select_patient', payload: paciente });
+        dispatch({ type: "select_patient", payload: paciente });
         setBusqueda(""); 
         navigate("/paciente");
     };

@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { useNavigate } from "react-router-dom";
 
 // --- COMPONENTES AUXILIARES ---
-const InputFloatingFlex = ({ label, name, type = "text", icon, onChange, accentColor, colSize = "col-md-4", value, required = false, warning }) => (
-  <div className={`${colSize} mb-2`}>
-    {/* El title aquí genera el mensaje al pasar el cursor */}
+const InputFloatingFlex = ({ label, name, type = "text", icon, onChange, onBlur, accentColor, colSize = "col-md-4", value, required = false, warning }) => (
+  <div className={`${colSize} mb-2`}>    
     <div className="form-floating shadow-sm" title={warning || ""}>
       <input
         type={type}
@@ -59,7 +58,7 @@ export default function Healthform() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    nombre: "", apellidos: "", dni: "", email: "", telefono: "", nacimiento: "", edad: "--",
+    nombre: "", apellidos: "", dni: "", email: "", telefono: "", fechaNacimiento: "", edad: "--",
     direccion: "", ciudad: "", pais: "", cp: "",
     peso: "", altura: "", tension: "", frecuencia: "",
     salud: "NO", hipertension: "NO", corazon: "NO", medicamento: "NO",
@@ -82,43 +81,39 @@ export default function Healthform() {
     observaciones: "", antecedentes: "", anotaciones: ""
   });
 
-  const handleGuardar = () => {
-    const { dni, nombre, apellidos, email, telefono } = formData;
+  useEffect(() => {
+    if (store.pacienteActual) {
+      console.log("Editando paciente:", store.pacienteActual);
+      setFormData(store.pacienteActual);
+    }
+  }, [store.pacienteActual]);
 
-    // Validación de campos obligatorios
-    if (!nombre || !apellidos || !dni || !email || !telefono) {
-      alert("Por favor, rellena los campos obligatorios marcados con *");
-      return;
+
+  const handleGuardar = async () => {
+    const token = localStorage.getItem("token");
+    const esEdicion = formData.id || formData.patient_id;
+    const url = esEdicion
+      ? `${import.meta.env.VITE_BACKEND_URL}/api/pacientes/${esEdicion}`
+      : `${import.meta.env.VITE_BACKEND_URL}/api/pacientes`;
+
+    const response = await fetch(url, {
+      method: esEdicion ? "PUT" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(formData)
+    });
+
+    if (response.ok) {
+      alert(esEdicion ? "✅ Paciente actualizado con éxito" : "✅ Paciente creado con éxito");
+      dispatch({ type: "clear_patient" });
+      navigate("/pacientes");
+    } else {
+      const errorData = await response.json();
+      alert("⚠️ " + errorData.msg);
     }
 
-    const dniRegex = /^\d{8}[a-zA-Z]$/;
-    if (!dniRegex.test(dni)) {
-      alert("El formato del DNI no es válido (ej: 12345678X).");
-      return;
-    }
-
-    // Validación de Email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      alert("El formato del correo electrónico no es válido.");
-      return;
-    }
-
-    // Validación de Teléfono (mínimo 9 dígitos)
-    if (telefono.length < 9) {
-      alert("El número de teléfono debe tener al menos 9 dígitos.");
-      return;
-    }
-
-    const datosAFicha = {
-      ...formData,
-      imc_ideal: infoIMC.ideal
-    };
-
-    // Si todo está ok, guardamos
-    dispatch({ type: 'save_patient', payload: formData });
-    alert("¡Paciente registrado con éxito!");
-    navigate("/paciente");
   };
 
   const handleInputChange = (e) => {
@@ -127,15 +122,31 @@ export default function Healthform() {
     setFormData(prevData => {
       const nuevosDatos = { ...prevData, [name]: value };
 
-      // Lógica de cálculo de edad
       if (name === "nacimiento") {
         const anioActual = new Date().getFullYear();
         nuevosDatos.edad = value && value > 1900 ? anioActual - parseInt(value) : "--";
       }
+      if (name === "embarazo") console.log("Cambiando embarazo a:", value);
+      setFormData({
+        ...formData,
+        [name]: value
+      });
 
       return nuevosDatos;
     });
   };
+
+  const calcularEdad = (fecha) => {
+    if (!fecha) return "";
+    const hoy = new Date();
+    const cumple = new Date(fecha);
+    let edad = hoy.getFullYear() - cumple.getFullYear();
+    const m = hoy.getMonth() - cumple.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < cumple.getDate())) edad--;
+    return edad >= 0 ? edad : "";
+  };
+
+  const valorEdad = calcularEdad(formData.nacimiento);
 
   const getInfoIMC = () => {
     const { peso, altura } = formData;
@@ -143,7 +154,6 @@ export default function Healthform() {
       const alturaMetros = altura / 100;
       const imc = (peso / Math.pow(alturaMetros, 2)).toFixed(1);
 
-      // CÁLCULO DE REFERENCIA (IMC Normal: 18.5 a 24.9)
       const pesoMin = (18.5 * Math.pow(alturaMetros, 2)).toFixed(1);
       const pesoMax = (24.9 * Math.pow(alturaMetros, 2)).toFixed(1);
       const rangoNormal = `${pesoMin} - ${pesoMax} kg`;
@@ -179,7 +189,6 @@ export default function Healthform() {
   if (formData.hepatitis === "SI") alertasActivas.push({ msg: "PROTOCOLO: HEPATITIS", color: "danger", icon: "fa-virus" });
   if (formData.tuberculosis === "SI") alertasActivas.push({ msg: "PROTOCOLO: TUBERCULOSIS", color: "danger", icon: "fa-lungs" });
   if (formData.vih === "SI") alertasActivas.push({ msg: "PROTOCOLO: VIH+", color: "danger", icon: "fa-biohazard" });
-  if (formData.osteoporosis === "SI") alertasActivas.push({ msg: "ATENCIÓN: BIFOSFONATOS (RIESGO NECROSIS)", color: "warning", icon: "fa-bone" });
   if (formData.radiacion_cabeza === "SI") alertasActivas.push({ msg: "ANTECEDENTE: RADIACIÓN CABEZA/CUELLO", color: "warning", icon: "fa-radiation" });
 
   const secciones = [
@@ -187,7 +196,7 @@ export default function Healthform() {
       titulo: "Estado General y Cardiovascular",
       color: "#007bff",
       preguntas: [
-        { q: "¿Goza de buena salud?", name: "salud_buena" }, // Cambiado
+        { q: "¿Goza de buena salud?", name: "salud_buena" },
         { q: "¿Sufre de hipertensión arterial?", name: "hipertension" },
         { q: "¿Sufre enfermedad del corazón?", name: "enfermedad_corazon", textarea: true },
         { q: "¿Toma algún medicamento?", name: "medicamentos_actuales", textarea: true },
@@ -209,8 +218,8 @@ export default function Healthform() {
       preguntas: [
         { q: "¿Padece o ha pasado Cáncer?", name: "cancer", textarea: true },
         { q: "¿Ha recibido Radiación?", name: "radiacion", textarea: true },
-        { q: "¿Es fumador/a?", name: "fumador" }, // Único
-        { q: "¿Consume alcohol?", name: "alcohol" }, // Único
+        { q: "¿Es fumador/a?", name: "fumador" },
+        { q: "¿Consume alcohol?", name: "alcohol" },
       ]
     },
     {
@@ -238,6 +247,31 @@ export default function Healthform() {
     }
   };
 
+  const [dniRepetido, setDniRepetido] = useState(false);
+  const dniValido = /^\d{8}[a-zA-Z]$/.test(formData.dni || "");
+  const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email || "");
+  const formularioListo = dniValido && emailValido && !dniRepetido;
+
+  const verificarDniExistente = async (dni) => {
+    if (!dniValido) return; // Solo busca si el formato es correcto
+
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/pacientes/check-dni/${dni}`, {
+        headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+    });
+
+    if (response.status === 400) {
+        setDniRepetido(true);
+    } else {
+        setDniRepetido(false);
+    }
+};
+
+  const handleSubmit = () => {
+    console.log("Guardando paciente:", formData);
+    alert("Paciente guardado correctamente (lógica de backend pendiente)");
+
+  };
+
   return (
     <div className="container-fluid py-5 bg-light min-vh-100 font-sans">
       <div className="mx-auto" style={{ maxWidth: "1200px" }}>
@@ -248,43 +282,52 @@ export default function Healthform() {
           <button
             className="btn btn-lg text-white px-5 shadow"
             style={{ backgroundColor: "#e8888c", borderRadius: '12px' }}
-            onClick={handleGuardar} // <--- Muy importante
+            onClick={handleGuardar}
           >
             <i className="fas fa-save me-2"></i>Guardar Ficha
           </button>
         </div>
 
         {/* ALERTAS DIRECTAS */}
-        <div className="mb-4">
-          {formData.embarazo === "SI" && (
-            <div className="alert alert-danger border-0 shadow mi-alerta-viva d-flex align-items-center mb-2">
-              <i className="fas fa-baby me-3 fa-2xl"></i>
-              <div>
-                <div className="fw-bold text-uppercase small" style={{ letterSpacing: '1px' }}>Condición Crítica Detectada</div>
-                <div className="fw-bold h5 mb-0">PACIENTE EMBARAZADA: PROHIBIDO Rx Y REVISAR FÁRMACOS</div>
-              </div>
-            </div>
-          )}
+        <div className="d-flex flex-wrap gap-2 mb-4">
+
           {formData.glucosa > 200 && (
-            <div className="alert alert-warning border-0 shadow d-flex align-items-center mb-2" style={{ borderLeft: '5px solid #ffc107' }}>
-              <i className="fas fa-droplet me-3 fa-2xl text-danger"></i>
+            <div className="alert alert-warning border-0 shadow-sm d-flex align-items-center px-3 py-2 mb-0"
+              style={{ borderLeft: '4px solid #ffc107', cursor: 'help', flex: '1 1 auto', maxWidth: 'fit-content' }}
+              title="¡ATENCIÓN! Hiperglucemia detectada. Riesgo de infección y mala cicatrización.">
+              <i className="fas fa-droplet me-2 fa-lg text-danger"></i>
               <div>
-                <div className="fw-bold text-uppercase small" style={{ letterSpacing: '1px' }}>Alerta Metabólica</div>
-                <div className="fw-bold mb-0">HIPERGLUCEMIA DETECTADA: {formData.glucosa} mg/dL (Riesgo Quirúrgico)</div>
+                <div className="fw-bold text-uppercase" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>Metabólico</div>
+                <div className="fw-bold small">GLUCOSA: {formData.glucosa} mg/dL</div>
               </div>
             </div>
           )}
+
           {(formData.alergia_penicilina === "SI" ||
             formData.alergia_terramicina === "SI" ||
             formData.alergia_anestesia === "SI" ||
             formData.alergia_latex === "SI" ||
             formData.alergia_aines === "SI" ||
             formData.alergia_otros) && (
-              <div className="alert alert-danger border-0 shadow d-flex align-items-center mb-2 animate__animated animate__shakeX">
-                <i className="fas fa-biohazard me-3 fa-2xl"></i>
+              <div className="alert alert-danger border-0 shadow-sm d-flex align-items-center px-4 py-2 mb-0"
+                style={{
+                  cursor: 'help',
+                  flex: '1 1 auto',
+                  maxWidth: 'fit-content',
+                  minWidth: '250px'
+                }}
+                title={`ADVERTENCIA MÉDICA:\n${[
+                  formData.alergia_penicilina === "SI" ? "- No administrar Penicilinas." : null,
+                  formData.alergia_terramicina === "SI" ? "- No administrar Terramicina." : null,
+                  formData.alergia_anestesia === "SI" ? "- Revisar tipo de Anestesia." : null,
+                  formData.alergia_latex === "SI" ? "- Usar material libre de Látex." : null,
+                  formData.alergia_aines === "SI" ? "- No administrar Aspirina/AINEs." : null,
+                  formData.alergia_otros ? `- Otros: ${formData.alergia_otros}` : null
+                ].filter(Boolean).join("\n")}`}>
+                <i className="fas fa-biohazard me-3 fa-xl"></i>
                 <div>
-                  <div className="fw-bold text-uppercase small" style={{ letterSpacing: '1px' }}>Riesgo Clínico: Alergias Detectadas</div>
-                  <div className="fw-bold">
+                  <div className="fw-bold text-uppercase" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>Alergias Detectadas</div>
+                  <div className="fw-bold" style={{ fontSize: '0.9rem' }}>
                     {[
                       formData.alergia_penicilina === "SI" ? "PENICILINA" : null,
                       formData.alergia_terramicina === "SI" ? "TERRAMICINA" : null,
@@ -298,10 +341,47 @@ export default function Healthform() {
               </div>
             )}
 
+          {[
+            { name: "hepatitis", label: "HEPATITIS", icon: "fa-virus", msg: "Riesgo biológico. Protocolo reforzado." },
+            { name: "tuberculosis", label: "TUBERCULOSIS", icon: "fa-mask-face", msg: "Contagio por aire. Uso de FFP3." },
+            { name: "vih", label: "VIH", icon: "fa-shield-virus", msg: "Paciente inmunodeprimido." },
+            { name: "embarazo", label: "EMBARAZO", icon: "fa-baby", msg: "¡CRÍTICO! Prohibido Rx y revisar fármacos." },
+            { name: "radiacion_cabeza", label: "RADIACIÓN C/C", icon: "fa-radiation", msg: "Antecedente radioterapia." },
+            { name: "cancer", label: "CÁNCER", icon: "fa-ribbon", msg: "Evaluar estado general y medicación." }
+          ].map((riesgo) => (
+            formData[riesgo.name] === "SI" && (
+              <div
+                key={riesgo.name}
+                className={`alert border-0 shadow-sm d-flex align-items-center px-3 py-2 mb-0 ${riesgo.name === 'embarazo' ? 'mi-alerta-viva' : ''}`}
+                style={{
+                  backgroundColor: "#f3e5f5",
+                  borderLeft: "4px solid #6f42c1",
+                  cursor: 'help',
+                  flex: '1 1 auto',
+                  maxWidth: 'fit-content',
+                  pointerEvents: 'auto'
+                }}
+                title={riesgo.msg}
+              >
+                <i className={`fas ${riesgo.icon} me-2 fa-lg`} style={{ color: "#6f42c1", pointerEvents: 'none' }}></i>
+                <div style={{ pointerEvents: 'none' }}>
+                  <div className="fw-bold text-uppercase" style={{ fontSize: '0.6rem', color: "#6f42c1", letterSpacing: '1px' }}>Bioseguridad</div>
+                  <div className="fw-bold small text-dark">{riesgo.label}</div>
+                </div>
+              </div>
+            )
+          ))}
+
+          {/* 4. IMC */}
           {infoIMC.valor !== "--" && parseFloat(infoIMC.valor) > 35 && (
-            <div className="alert alert-warning border-0 shadow-sm d-flex align-items-center mb-2">
-              <i className="fas fa-weight-hanging me-3 fa-lg"></i>
-              <div className="fw-bold text-uppercase small">Alerta Metabólica: IMC elevado ({infoIMC.valor}).</div>
+            <div className="alert alert-warning border-0 shadow-sm d-flex align-items-center px-3 py-2 mb-0"
+              style={{ cursor: 'help', flex: '1 1 auto', maxWidth: 'fit-content' }}
+              title={`IMC Elevado (${infoIMC.valor}): Riesgo cardiovascular.`}>
+              <i className="fas fa-weight-hanging me-2 fa-lg"></i>
+              <div>
+                <div className="fw-bold text-uppercase" style={{ fontSize: '0.65rem', letterSpacing: '1px' }}>IMC</div>
+                <div className="fw-bold small">OBESIDAD: {infoIMC.valor}</div>
+              </div>
             </div>
           )}
         </div>
@@ -312,22 +392,68 @@ export default function Healthform() {
           <div className="row g-2">
             <InputFloatingFlex label="Nombre" name="nombre" value={formData.nombre} icon="fas fa-user" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-4" required={true} />
             <InputFloatingFlex label="Apellidos" name="apellidos" value={formData.apellidos} icon="fas fa-users" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-4" required={true} />
-            <InputFloatingFlex label="DNI / NIE" name="dni" value={formData.dni} icon="fas fa-id-card" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-4" required={true} />
+            <InputFloatingFlex
+              label="DNI / NIE"
+              name="dni"
+              value={formData.dni}
+              icon="fas fa-id-card"
+              accentColor={formData.dni && !dniValido ? "#e8888c" : "#17a2b8"}
+              onChange={handleInputChange}
+              onBlur={(e) => verificarDniExistente(e.target.value)} 
+              colSize="col-md-4"
+              required={true}
+            />
 
+            {((formData.dni && !dniValido) || dniRepetido) && (
+              <div className="position-absolute" style={{ fontSize: '0.65rem', color: '#e8888c', bottom: '-15px', left: '15px', zIndex: 10 }}>
+                {dniRepetido ? "⚠️ Este DNI ya está registrado" : "* Formato esperado: 12345678X"}
+              </div>
+            )}
             <div className="col-md-2 mb-2">
               <div className="form-floating shadow-sm">
-                <input type="text" className="form-control border-0 bg-info-subtle fw-bold text-info" value={formData.edad} readOnly />
+                <input
+                  type="date"
+                  name="nacimiento"
+                  value={formData.nacimiento}
+                  className="form-control border-0 bg-light text-dark"
+                  onChange={handleInputChange}
+                  max={new Date().toISOString().split("T")[0]}
+                />
+                <label className="small text-muted">Fecha Nac.</label>
+              </div>
+            </div>
+
+            {/* EDAD (AUTOMÁTICA) */}
+            <div className="col-md-1 mb-2">
+              <div className="form-floating shadow-sm">
+                <input
+                  type="text"
+                  className="form-control border-0 fw-bold text-center"
+                  style={{ backgroundColor: "#e9ecef", color: "#566873" }}
+                  value={valorEdad}
+                  readOnly
+                  placeholder="Edad"
+                />
                 <label className="small text-muted">Edad</label>
               </div>
-            </div>
-            <div className="col-md-2 mb-2">
-              <div className="form-floating shadow-sm">
-                <input type="number" name="nacimiento" value={formData.nacimiento} className="form-control border-0 bg-light text-dark" placeholder="Año" onChange={handleInputChange} />
-                <label className="small text-muted">Año Nac.</label>
-              </div>
+
             </div>
             <InputFloatingFlex label="Teléfono" name="telefono" type="tel" value={formData.telefono} icon="fas fa-phone" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-3" required={true} />
-            <InputFloatingFlex label="Email" name="email" type="email" value={formData.email} icon="fas fa-envelope" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-5" required={true} />
+            <InputFloatingFlex
+              label="Correo Electrónico"
+              name="email"
+              value={formData.email}
+              icon="fas fa-envelope"
+              accentColor={formData.email && !emailValido ? "#e8888c" : "#17a2b8"}
+              onChange={handleInputChange}
+              colSize="col-md-4"
+              required={true}
+            />
+            {formData.email && !emailValido && (
+              <div className="position-absolute" style={{ fontSize: '0.65rem', color: '#e8888c', bottom: '-15px', left: '15px' }}>
+                * Introduce un email válido
+              </div>
+            )}
             <InputFloatingFlex label="Dirección" name="direccion" value={formData.direccion} icon="fas fa-map-marker-alt" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-12" />
             <InputFloatingFlex label="Ciudad" name="ciudad" value={formData.ciudad} icon="fas fa-city" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-5" />
             <InputFloatingFlex label="País" name="pais" value={formData.pais} icon="fas fa-globe-americas" accentColor="#17a2b8" onChange={handleInputChange} colSize="col-md-4" />
@@ -342,39 +468,58 @@ export default function Healthform() {
             </h6>
             <div className="row g-3">
               {[
-                { name: "hepatitis", label: "HEPATITIS", msg: "Riesgo biológico. Protocolo de esterilización reforzado." },
-                { name: "tuberculosis", label: "TUBERCULOSIS", msg: "Contagio por aire. Uso de mascarilla FFP3 obligatorio." },
-                { name: "vih", label: "VIH", msg: "Paciente inmunodeprimido. Vigilancia de infecciones." },
-                { name: "osteoporosis", label: "OSTEOPOROSIS / BIFOSFONATOS", msg: "¡ALERTA! Riesgo de osteonecrosis en cirugía/extracciones." },
-                { name: "radiacion_cabeza", label: "RADIACIÓN CABEZA/CUELLO", msg: "Antecedente de radioterapia: fragilidad ósea y xerostomía." },
-                { name: "cancer", label: "CÁNCER (ACTIVO/ANTECEDENTE)", msg: "Evaluar estado general y medicación oncológica." },
-                { name: "embarazo", label: "EMBARAZO", msg: "¡CRÍTICO! Paciente embarazada. Prohibido radiografías sin protección/justificación y verificar fármacos." },
+                { name: "hepatitis", label: "HEPATITIS" },
+                { name: "tuberculosis", label: "TUBERCULOSIS" },
+                { name: "vih", label: "VIH" },
+                { name: "embarazo", label: "EMBARAZO" },
+                { name: "radiacion_cabeza", label: "RADIACIÓN C/C" },
+                { name: "cancer", label: "CÁNCER" },
               ].map((item) => {
-                const activo = formData[item.name] === "SI"; // Definimos la condición
-
+                const activo = formData[item.name] === "SI";
                 return (
                   <div className="col-md-6 col-lg-4" key={item.name}>
                     <div
-                      /* Aplicamos la misma clase que usamos en alergias */
                       className={`d-flex align-items-center justify-content-between p-3 rounded-3 shadow-sm ${activo ? 'mi-alerta-viva' : 'bg-light border'}`}
-                      title={activo ? item.msg : "Sin riesgo reportado"}
-                      style={{ cursor: activo ? 'help' : 'default', transition: 'all 0.3s' }}
+                      style={{ transition: 'all 0.3s ease' }}
                     >
                       <span className={`small fw-bold ${activo ? 'text-danger' : 'text-secondary'}`}>
-                        {activo && <i className="fas fa-biohazard me-2"></i>}
+                        {activo && <i className="fas fa-exclamation-triangle me-2"></i>}
                         {item.label}
                       </span>
-                      <div className="btn-group btn-group-sm">
-                        <input type="radio" className="btn-check" name={item.name} id={`${item.name}-si`} value="SI" onChange={handleInputChange} checked={formData[item.name] === "SI"} />
-                        <label className={`btn ${activo ? 'btn-danger' : 'btn-outline-danger'} border-0 px-3`} htmlFor={`${item.name}-si`}>SÍ</label>
-                        <input type="radio" className="btn-check" name={item.name} id={`${item.name}-no`} value="NO" onChange={handleInputChange} checked={formData[item.name] === "NO"} />
-                        <label className="btn btn-outline-secondary border-0 px-3" htmlFor={`${item.name}-no`}>NO</label>
+
+                      <div className="btn-group btn-group-sm shadow-sm" style={{ borderRadius: '8px', overflow: 'hidden' }}>
+                        <input
+                          type="radio"
+                          className="btn-check"
+                          name={item.name}
+                          id={`radio-${item.name}-si`}
+                          value="SI"
+                          onChange={handleInputChange}
+                          checked={formData[item.name] === "SI"}
+                        />
+                        <label className={`btn ${activo ? 'btn-danger' : 'btn-outline-danger'} border-0 px-3`} htmlFor={`radio-${item.name}-si`}>
+                          SÍ
+                        </label>
+
+                        <input
+                          type="radio"
+                          className="btn-check"
+                          name={item.name}
+                          id={`radio-${item.name}-no`}
+                          value="NO"
+                          onChange={handleInputChange}
+                          checked={formData[item.name] === "NO" || !formData[item.name]}
+                        />
+                        <label className="btn btn-outline-secondary border-0 px-3" htmlFor={`radio-${item.name}-no`}>
+                          NO
+                        </label>
                       </div>
                     </div>
                   </div>
                 );
               })}
             </div>
+
           </div>
         </div>
 
@@ -406,11 +551,11 @@ export default function Healthform() {
               </style>
 
               {[
-                { id: "pen", name: "alergia_penicilina", label: "PENICILINA" },
-                { id: "ter", name: "alergia_terramicina", label: "TERRAMICINA" },
-                { id: "anes", name: "alergia_anestesia", label: "ANESTESIA" },
-                { id: "lat", name: "alergia_latex", label: "LÁTEX" },
-                { id: "aine", name: "alergia_aines", label: "AINEs / ASPIRINA" },
+                { id: "pen", name: "alergia_penicilina", label: "PENICILINA", aviso: "¡PROHIBIDO! No administrar derivados de la penicilina ni betalactámicos." },
+                { id: "ter", name: "alergia_terramicina", label: "TERRAMICINA", aviso: "¡ALERTA! Evitar tetraciclinas. Riesgo de reacción cutánea o shock." },
+                { id: "anes", name: "alergia_anestesia", label: "ANESTESIA", aviso: "¡MUY IMPORTANTE! Revisar historial para tipo de anestesia local/general prohibida." },
+                { id: "lat", name: "alergia_latex", label: "LÁTEX", aviso: "¡PRECAUCIÓN! Usar material quirúrgico libre de látex (guantes de nitrilo/vinilo)." },
+                { id: "aine", name: "alergia_aines", label: "AINEs / ASPIRINA", aviso: "¡PELIGRO! No administrar Aspirina, Ibuprofeno ni otros antiinflamatorios no esteroideos." },
               ].map((alg) => {
                 const esCritico = formData[alg.name] === "SI";
 
@@ -418,7 +563,7 @@ export default function Healthform() {
                   <div className="col-md-4" key={alg.id}>
                     <div
                       className={`d-flex align-items-center justify-content-between p-3 rounded-3 shadow-sm ${esCritico ? 'mi-alerta-viva' : 'bg-light border'}`}
-                      title={esCritico ? `¡ALERTA CRÍTICA! Paciente alérgico a: ${alg.label}` : ""}
+                      title={esCritico ? alg.aviso : "Marcar si el paciente refiere alergia"}
                       style={{ cursor: esCritico ? 'help' : 'default', transition: 'all 0.3s' }}
                     >
                       <span className={`small fw-bold ${esCritico ? 'text-danger' : 'text-dark'}`}>
@@ -633,6 +778,23 @@ export default function Healthform() {
               </small>
             </div>
           </div>
+        </div>
+        <div className="d-flex justify-content-center mt-5 mb-5 pb-5">
+          <button
+            className={`btn btn-lg px-5 shadow-sm fw-bold ${formularioListo ? 'text-white' : 'btn-light text-muted'}`}
+            style={{
+              backgroundColor: formularioListo ? "#5e888c" : "#e0e0e0",
+              borderRadius: "15px",
+              cursor: formularioListo ? "pointer" : "not-allowed",
+              border: "none",
+              minWidth: "300px"
+            }}
+            disabled={!formularioListo}
+            onClick={handleGuardar}
+          >
+            <i className={`fas ${formularioListo ? 'fa-save' : 'fa-lock'} me-2`}></i>
+            {formularioListo ? "Guardar Paciente" : "Revisar DNI / Email"}
+          </button>
         </div>
       </div>
     </div>

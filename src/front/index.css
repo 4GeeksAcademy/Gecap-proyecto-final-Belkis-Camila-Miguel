@@ -42,7 +42,7 @@
 @media print {
   
     .d-print-block {
-        page-break-inside: avoid; /* No partir la firma */
+        page-break-inside: avoid; 
         break-inside: avoid;
         margin-top: 50px !important; 
         display: block !important;
@@ -69,7 +69,7 @@
     body {
         background-color: white !important;
         color: #000 !important;
-        font-family: "Times New Roman", serif; /* Fuente más formal para informes */
+        font-family: "Times New Roman", serif; 
         margin: 0;
         padding: 0;
     }
@@ -123,4 +123,71 @@
         display: block !important;
         position: relative;
     }
+}
+
+.fc .fc-button-primary {
+    background-color: #566873 !important;
+    border-color: #566873 !important;
+    border-radius: 6px !important; 
+    font-weight: 600 !important;
+    padding: 4px 10px !important; 
+    font-size: 0.8rem !important; 
+    transition: all 0.3s ease;
+    text-transform: capitalize;
+}
+
+.fc .fc-button-primary:hover {
+    background-color: #5e888c !important;
+    border-color: #5e888c !important;
+}
+
+.fc .fc-button-primary:disabled {
+    background-color: #93bbbf !important;
+    border-color: #93bbbf !important;
+    opacity: 0.7;
+}
+
+.fc .fc-button-active {
+    background-color: #b4d2d9 !important;
+    border-color: #b4d2d9 !important;
+    color: #566873 !important;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.15rem !important; 
+    color: #566873;
+    font-weight: 700 !important;
+}
+
+.fc-theme-standard td, .fc-theme-standard th {
+    border: 1px solid #ebf2f1 !important;
+}
+
+.fc-col-header-cell {
+    background-color: #f8fafb;
+    padding: 10px 0 !important;
+}
+
+.fc-col-header-cell-cushion {
+    color: #566873;
+    text-decoration: none !important;
+}
+
+.fc-event {
+    border: none !important;
+    padding: 2px 4px !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-size: 0.85rem;
+}
+
+.fc .fc-timegrid-now-indicator-line {
+    border-color: #e8888c !important;
+    border-width: 2px !important;
+}
+
+.fc .fc-timegrid-now-indicator-arrow {
+    border-color: #e8888c !important;
+    border-top-color: transparent !important;
+    border-bottom-color: transparent !important;
 }

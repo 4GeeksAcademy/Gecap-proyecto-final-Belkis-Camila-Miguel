@@ -42,33 +42,49 @@ export const initialStore = () => {
 
 export default function storeReducer(store, action = {}) {
   switch (action.type) {
+    
+    case "login_user":
+      return {
+        ...store,
+        token: action.payload.token,
+        user: action.payload.user,
+        role: action.payload.role, 
+      };
+
+    case "set_patients":
+      return {
+        ...store,
+        pacientes: action.payload,
+      };
+
     case "save_patient":
       return {
         ...store,
         pacientes: [...(store.pacientes || []), action.payload],
         pacienteActual: action.payload,
       };
+
     case "select_patient":
       return {
         ...store,
         pacienteActual: action.payload,
       };
+  
     case "clear_patient":
       return {
         ...store,
         pacienteActual: null,
       };
-    case "set_hello":
-      return { ...store, message: action.payload };
-    case "add_task":
-      const { id, color } = action.payload;
+
+    case "delete_patient":
       return {
-        ...store,
-        todos: store.todos.map((todo) =>
-          todo.id === id ? { ...todo, background: color } : todo,
-        ),
+        ...store,       
+        pacientes: store.pacientes.filter(p => p.id !== action.payload),        
+        pacienteActual: store.pacienteActual?.id === action.payload ? null : store.pacienteActual
       };
+
     default:
       return store;
   }
+   
 }

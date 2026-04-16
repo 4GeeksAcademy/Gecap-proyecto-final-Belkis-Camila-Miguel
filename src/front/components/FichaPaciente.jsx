@@ -4,7 +4,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer";
 import { BuscadorPacientes } from "./BuscadorPacientes";
 
 export const FichaPaciente = () => {
-    const { store } = useGlobalReducer();
+    const { store, dispatch } = useGlobalReducer();
     const p = store.pacienteActual;
     const navigate = useNavigate();
 
@@ -104,6 +104,20 @@ export const FichaPaciente = () => {
 
     const saludable = esPesoSaludable();
 
+    const handleEliminarDesdeFicha = async (id) => {
+        if (!window.confirm("¿Estás seguro de eliminar permanentemente este paciente?")) return;
+
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/pacientes/${id}`, {
+            method: "DELETE",
+            headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+        });
+
+        if (response.ok) {
+            dispatch({ type: "delete_patient", payload: id });
+            navigate("/pacientes");
+        }
+    };
+
     return (
         <div className="container-fluid py-4 bg-light min-vh-100">
             {/* 1. NAVEGACIÓN Y ALERTAS STICKY */}
@@ -199,9 +213,17 @@ export const FichaPaciente = () => {
                         </div>
                         <div className="card-body bg-white">
                             <ul className="list-group list-group-flush">
+                                <li className="list-group-item px-0 py-2 border-bottom">
+                                    <span className="text-muted small d-block">DNI / NIE</span>
+                                    <span className="fw-bold">{p.dni}</span>
+                                </li>
                                 <li className="list-group-item px-0 py-3 border-bottom"><span className="text-muted small d-block">Email</span><span className="fw-bold">{p.email}</span></li>
                                 <li className="list-group-item px-0 py-3 border-bottom"><span className="text-muted small d-block">Teléfono</span><span className="fw-bold" style={{ color: "#e8888c" }}>{p.telefono}</span></li>
-                                <li className="list-group-item px-0 py-3 border-0"><span className="text-muted small d-block">Dirección</span><span className="small fw-semibold">{p.direccion}, {p.ciudad}</span></li>
+                                <li className="list-group-item px-0 py-3 border-0"><span className="text-muted small d-block">Dirección</span><span className="small fw-semibold">{p.direccion}, {p.ciudad}</span></li>                            
+                                <li className="list-group-item px-0 py-2 border-bottom">
+                                    <span className="text-muted small d-block">Fecha de Nacimiento</span>
+                                    <span className="fw-bold">{p.nacimiento || "No registrada"}</span>
+                                </li>                          
                             </ul>
                         </div>
                     </div>
@@ -266,13 +288,25 @@ export const FichaPaciente = () => {
                                     <p className="text-secondary mb-4">{p.anotaciones || "No hay notas registradas."}</p>
                                     <hr />
                                     <div className="d-flex flex-wrap gap-3 justify-content-end d-print-none">
-                                        <button className="btn px-4 btn-outline-secondary" style={{ borderRadius: "10px" }}>Editar Ficha</button>
+                                        <button
+                                            className="btn px-4 btn-outline-secondary"
+                                            style={{ borderRadius: "10px" }}
+                                            onClick={() => navigate("/healthform")}
+                                        >
+                                            Editar Ficha
+                                        </button>
                                         <button className="btn px-4 text-white" style={{ backgroundColor: "#e8888c", borderRadius: "10px" }} onClick={() => navigate("/agenda", { state: { pacienteId: p.id, nombre: p.nombre } })}>Nueva Consulta</button>
                                         <button className="btn px-4 text-white" style={{ backgroundColor: "#566873", borderRadius: "10px" }} onClick={() => window.print()}>Generar Informe</button>
+                                        <button
+                                            className="btn btn-outline-danger rounded-pill px-3 shadow-sm"
+                                            onClick={() => handleEliminarDesdeFicha(p.id)}
+                                        >
+                                            <i className="fas fa-trash-alt me-2"></i>Eliminar Paciente
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                            <div className="d-none d-print-block w-100">                               
+                            <div className="d-none d-print-block w-100">
                                 <div style={{ height: "100px" }}></div>
 
                                 <div className="d-flex justify-content-end">
