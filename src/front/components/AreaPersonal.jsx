@@ -7,15 +7,24 @@ function AreaPersonal() {
     const [pacientesHoy, setPacientesHoy] = useState([]);
     const profesional = { nombre: "Juan Pérez" };
 
-    useEffect(()=>{
-        fetch('http://127.0.0.1:3001/api/appointments')
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data);
-            setPacientesHoy(data);
+    useEffect(() => {
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointments`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+            }
         })
-        .catch((error) => console.error("Error:", error));
-    },[] );
+            .then((response) => {
+                if (!response.ok) throw new Error("Error en la carga de citas");
+                return response.json();
+            })
+            .then((data) => {
+                console.log("Citas cargadas:", data);
+                setPacientesHoy(data);
+            })
+            .catch((error) => console.error("Error:", error));
+    }, []);
 
     const stats = {
         totalPacientes: pacientesHoy.length,
@@ -30,7 +39,7 @@ function AreaPersonal() {
                 <DoctorScheduleBar appointments={pacientesHoy} />
             </div>
 
-             <div className="row mb-4 g-3">
+            <div className="row mb-4 g-3">
                 <div className="col-lg-12">
                     <div className="card border-0 shadow-sm p-4 h-100 " style={{ borderRadius: "20px", borderLeft: "8px solid #93bbbf" }}>
                         <h2 className="text-secondary mb-1" style={{ fontSize: "2em" }}>Bienvenido,{" "}

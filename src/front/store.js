@@ -42,7 +42,6 @@ export const initialStore = () => {
 
 export default function storeReducer(store, action = {}) {
   switch (action.type) {
-    
     case "login_user":
       return {
         ...store,
@@ -82,9 +81,14 @@ export default function storeReducer(store, action = {}) {
         pacientes: store.pacientes.filter(p => p.id !== action.payload),        
         pacienteActual: store.pacienteActual?.id === action.payload ? null : store.pacienteActual
       };
+   
+    case "set_appointments":
+      return {
+        ...store,
+        appointments: action.payload
+      };
 
     default:
       return store;
   }
-   
 }

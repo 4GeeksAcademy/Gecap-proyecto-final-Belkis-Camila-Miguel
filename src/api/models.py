@@ -103,13 +103,17 @@ class Patient(db.Model):
             "anotaciones": self.anotaciones
         }
 
-
 class Appointment(db.Model):
     __tablename__ = "appointment"
     appointment_id: Mapped[int] = mapped_column(primary_key=True)
-    patient_id: Mapped[int] = mapped_column(ForeignKey("patient.patient_id"))
-    doctor_id: Mapped[int] = mapped_column(ForeignKey("doctor.doctor_id"))
-    date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    patient_id: Mapped[int] = mapped_column(ForeignKey("patient.patient_id"), nullable=False)
+    doctor_id: Mapped[int] = mapped_column(ForeignKey("doctor.doctor_id"), nullable=False)
+    
+    # Consejo: Usar String para fecha y hora por separado facilita la vida con los inputs de React
+    date: Mapped[str] = mapped_column(String(20), nullable=False) # "2024-05-20"
+    time: Mapped[str] = mapped_column(String(10), nullable=False) # "10:30"
+    
+    reason: Mapped[str] = mapped_column(String(200), nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="pendiente")
 
     doctor: Mapped["Doctor"] = relationship(back_populates="appointment")
@@ -119,7 +123,11 @@ class Appointment(db.Model):
         return {
             "id": self.appointment_id,
             "patient_id": self.patient_id,
+            # Incluimos nombres para que el frontend no tenga que buscarlos
+            "patient_name": f"{self.patient.nombre} {self.patient.apellidos}" if self.patient else "Desconocido",
             "doctor_id": self.doctor_id,
-            "date": self.date.isoformat() if self.date else None,
+            "date": self.date,
+            "time": self.time,
             "status": self.status,
+            "reason": self.reason
         }
