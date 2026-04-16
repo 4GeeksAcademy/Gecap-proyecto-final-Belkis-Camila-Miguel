@@ -69,7 +69,7 @@ const opcionesGrafica = {
                             </div>
                         </div>
                     </div>
-                    {/* Tarjeta Resumen */}
+                    
                     <div className="col-md-4">
                         <div className="card border-0 shadow-sm p-4 text-white h-100 text-center d-flex flex-column justify-content-center" style={{ backgroundColor: "#566873", borderRadius: "20px" }}>
                             <h2 className="display-4 fw-bold">1</h2>
