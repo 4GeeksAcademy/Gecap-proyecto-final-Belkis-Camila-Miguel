@@ -223,10 +223,10 @@ def get_appointment(appointment_id):
 def add_appointment():
     data = request.get_json()
     patient = db.session.execute(select(Patient).where(
-        Patient.patient_name == "patient_name"))
+        Patient.nombre == "nombre"))
 
     if not patient:
-        patient = Patient(patient_name=data["patient_name"])
+        patient = Patient(nombre=data["nombre"])
         db.session.add(patient)
         db.session.commit()
 
