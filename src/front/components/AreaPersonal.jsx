@@ -71,7 +71,7 @@ function AreaPersonal() {
     };
    const updateAppointment = async (appointment_id, updatedData) => {
     try {
-        const response = await fetch(`https://special-train-g4vwpjx9pvqv3pvwv-3001.app.github.dev/api/appointment ${appointment_id}`, {
+        const response = await fetch(`https://special-train-g4vwpjx9pvqv3pvwv-3001.app.github.dev/api/appointment {appointment_id}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
