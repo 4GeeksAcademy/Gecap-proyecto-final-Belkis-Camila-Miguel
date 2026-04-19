@@ -1,6 +1,6 @@
 import React, { useState } from "react"; // Añadido React para evitar advertencias
 import { Link, useNavigate } from "react-router-dom";
-import "./SignUp.css";
+import "../pages/SignUp.css";
 import logo from "../assets/img/gecap_navbar_clean.png";
 
 function SignUp() {

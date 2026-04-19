@@ -8,7 +8,7 @@ function DoctorScheduleBar({ appointments }) {
 
   const now = new Date();
   const currentTime = now.getHours() + now.getMinutes() / 60;
-
+  console.log(appointments)
   const appointmentsBar = (appointments || []).map((appointment) => {
     let start, end;
 

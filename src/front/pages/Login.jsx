@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import icon from "../assets/img/gecap_navbar_clean.png";
-import "./login.css";
+import "../pages/login.css";
 import { Link, useNavigate } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 
