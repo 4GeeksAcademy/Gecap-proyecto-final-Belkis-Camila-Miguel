@@ -12,13 +12,11 @@ export const Sidebar = () => {
     const pacienteItems = ["Agenda Médica"];
 
     const menuItems = [
-        { name: "Área personal", path: "/areapersonal", icon: "fas fa-notes-medical" },
-        { name: "Estadisticas", path: "/estadisticas", icon: "fas fa-chart-line" },
-        { name: "Agenda Médica", path: "/agenda", icon: "fas fa-calendar-alt" },
-        { name: "Alta de Paciente", path: "/healthform", icon: "fas fa-user-plus" },
-        { name: "Ficha de Paciente", path: "/paciente", icon: "fas fa-id-card-alt" },
-        { name: "Listado de Pacientes", path: "/pacientes", icon: "fas fa-users" },
-    ];
+    { name: "Área personal", path: "/areapersonal", icon: "fas fa-notes-medical" },
+    { name: "Estadisticas", path: "/estadisticas", icon: "fas fa-chart-line" },
+    { name: "Agenda Médica", path: "/agenda", icon: "fas fa-calendar-alt" },
+    { name: "Listado de Pacientes", path: "/pacientes", icon: "fas fa-users" }, // Dejamos este como principal
+];
 
     const currentRole = store.role || localStorage.getItem("userRole");
 

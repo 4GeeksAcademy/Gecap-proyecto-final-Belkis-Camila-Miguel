@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";
-import { BuscadorPacientes } from "./BuscadorPacientes";
 
 export const FichaPaciente = () => {
     const { store, dispatch } = useGlobalReducer();
@@ -120,12 +119,21 @@ export const FichaPaciente = () => {
 
     return (
         <div className="container-fluid py-4 bg-light min-vh-100">
-            {/* 1. NAVEGACIÓN Y ALERTAS STICKY */}
-            <div className="mb-3">
-                <button className="btn btn-sm btn-outline-secondary rounded-pill" onClick={() => dispatch({ type: 'clear_patient' })}>
-                    <i className="fas fa-chevron-left me-2"></i>Nueva Búsqueda
-                </button>
-            </div>
+           
+            <button
+                className="btn shadow-sm d-flex align-items-center gap-2 px-4"
+                style={{
+                    backgroundColor: "#566873",
+                    color: "white",
+                    borderRadius: "12px",
+                    border: "none",
+                    height: "45px"
+                }}
+                onClick={() => navigate("/pacientes")}
+            >
+                <i className="fas fa-search"></i>
+                <span className="fw-bold">Nueva Búsqueda</span>
+            </button>
 
             <div className="sticky-top pt-2" style={{ zIndex: 1050, top: '10px', pointerEvents: 'none' }}>
                 <div className="d-flex flex-wrap gap-3 justify-content-center">
@@ -219,11 +227,11 @@ export const FichaPaciente = () => {
                                 </li>
                                 <li className="list-group-item px-0 py-3 border-bottom"><span className="text-muted small d-block">Email</span><span className="fw-bold">{p.email}</span></li>
                                 <li className="list-group-item px-0 py-3 border-bottom"><span className="text-muted small d-block">Teléfono</span><span className="fw-bold" style={{ color: "#e8888c" }}>{p.telefono}</span></li>
-                                <li className="list-group-item px-0 py-3 border-0"><span className="text-muted small d-block">Dirección</span><span className="small fw-semibold">{p.direccion}, {p.ciudad}</span></li>                            
+                                <li className="list-group-item px-0 py-3 border-0"><span className="text-muted small d-block">Dirección</span><span className="small fw-semibold">{p.direccion}, {p.ciudad}</span></li>
                                 <li className="list-group-item px-0 py-2 border-bottom">
                                     <span className="text-muted small d-block">Fecha de Nacimiento</span>
                                     <span className="fw-bold">{p.nacimiento || "No registrada"}</span>
-                                </li>                          
+                                </li>
                             </ul>
                         </div>
                     </div>

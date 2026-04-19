@@ -3,7 +3,15 @@ import React, { createContext } from "react";
 export const Context = createContext(null);
 
 export const initialStore = () => {
+
+  const savedUser = localStorage.getItem("user");
+  
   return {
+   
+    token: localStorage.getItem("token") || null,
+    user: savedUser ? JSON.parse(savedUser) : null,
+    role: localStorage.getItem("userRole") || null,
+
     pacientes: [],
     pacienteActual: null,
     message: null,
@@ -49,6 +57,18 @@ export default function storeReducer(store, action = {}) {
         user: action.payload.user,
         role: action.payload.role, 
       };
+
+       case "logout_user":
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("userName");
+        return {
+          ...store,
+          token: null,
+          user: null,
+          role: null,
+        };
 
     case "set_patients":
       return {
