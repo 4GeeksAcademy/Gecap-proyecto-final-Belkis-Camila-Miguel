@@ -34,10 +34,10 @@ class Patient(db.Model):
     patient_id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.user_id"), nullable=True)
     nombre: Mapped[str] = mapped_column(String(100), nullable=False)
-    apellidos: Mapped[str] = mapped_column(String(100), nullable=False)
-    dni: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
-    email: Mapped[str] = mapped_column(String(120))
-    telefono: Mapped[str] = mapped_column(String(20))
+    apellidos: Mapped[str] = mapped_column(String(100), nullable=True)
+    dni: Mapped[str] = mapped_column(String(20), unique=True, nullable=True)
+    email: Mapped[str] = mapped_column(String(120), nullable=True)
+    telefono: Mapped[str] = mapped_column(String(20), nullable=True)
     nacimiento: Mapped[str] = mapped_column(String(20), nullable=True)
     appointments: Mapped[List["Appointment"]] = relationship(back_populates="patient")
 
@@ -50,19 +50,19 @@ class Patient(db.Model):
     grupo_sanguineo: Mapped[str] = mapped_column(String(10), nullable=True)
 
     # Riesgos y Bioseguridad (Guardamos "SI" o "NO")
-    embarazo: Mapped[str] = mapped_column(String(5), default="NO")
-    hepatitis: Mapped[str] = mapped_column(String(5), default="NO")
-    tuberculosis: Mapped[str] = mapped_column(String(5), default="NO")
-    vih: Mapped[str] = mapped_column(String(5), default="NO")
-    radiacion_cabeza: Mapped[str] = mapped_column(String(5), default="NO")
-    cancer: Mapped[str] = mapped_column(String(5), default="NO")
+    embarazo: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    hepatitis: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    tuberculosis: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    vih: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    radiacion_cabeza: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    cancer: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
 
     # Alergias
-    alergia_penicilina: Mapped[str] = mapped_column(String(5), default="NO")
-    alergia_terramicina: Mapped[str] = mapped_column(String(5), default="NO")
-    alergia_anestesia: Mapped[str] = mapped_column(String(5), default="NO")
-    alergia_latex: Mapped[str] = mapped_column(String(5), default="NO")
-    alergia_aines: Mapped[str] = mapped_column(String(5), default="NO")
+    alergia_penicilina: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    alergia_terramicina: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    alergia_anestesia: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    alergia_latex: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    alergia_aines: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
     alergia_otros: Mapped[str] = mapped_column(Text, nullable=True)
 
     anotaciones: Mapped[str] = mapped_column(Text, nullable=True)
@@ -108,10 +108,11 @@ class Appointment(db.Model):
         ForeignKey("patient.patient_id"), nullable=False)
     user_id: Mapped[int] = mapped_column(
         ForeignKey("user.user_id"), nullable=False)
-    date: Mapped[str] = mapped_column(String(20), nullable=False)
-    time: Mapped[str] = mapped_column(String(10), nullable=False)
+    date: Mapped[str] = mapped_column(String(50), nullable=False)
+    start: Mapped[str] = mapped_column(String(50), nullable=False)
+    end: Mapped[str] = mapped_column(String(50), nullable=False)
     reason: Mapped[str] = mapped_column(String(200), nullable=True)
-    status: Mapped[str] = mapped_column(String(20), default="pendiente")
+    status: Mapped[str] = mapped_column(String(50), default="pendiente")
     user: Mapped["User"] = relationship(back_populates="appointments")
     patient: Mapped["Patient"] = relationship(back_populates="appointments")
 
@@ -122,7 +123,8 @@ class Appointment(db.Model):
             "patient_name": f"{self.patient.nombre} {self.patient.apellidos}" if self.patient else "Desconocido",
             "user_id": self.user_id,
             "date": self.date,
-            "time": self.time,
+            "start": self.start,
+            "end": self.end,
             "status": self.status,
             "reason": self.reason
         }
