@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "./SignUp.css";
+import "../pages/SignUp.css";
 import logo from "../assets/img/gecap_navbar_clean.png";
 
 function SignUp() {
