@@ -12,11 +12,6 @@ api = Blueprint('api', __name__)
 
 CORS(api, resources={r"/*": {"origins": "*"}})
 
-@api.route('/external-appointment', methods=['POST'])
-def create_external_appointment():
-    data = request.get_json()
-    
-    medico = User.query.filter_by(role="medico").first()
 
     if not medico:
         return jsonify({"msg": "Debe haber al menos un médico registrado en el sistema"}), 400
@@ -38,18 +33,6 @@ def create_external_appointment():
         db.session.rollback()
         return jsonify({"msg": "Error interno", "error": str(e)}), 500
 
-@api.route('/public-appointments/<string:dni>', methods=['GET'])
-def get_public_appointments(dni):
-    patient = Patient.query.filter(Patient.dni.ilike(dni)).first()
-    if not patient:
-        return jsonify({"msg": "No se encontró el paciente"}), 404
-
-    appointments = Appointment.query.filter_by(
-        patient_id=patient.patient_id).all()
-    return jsonify({
-        "paciente": patient.nombre,
-        "citas": [a.serialize() for a in appointments if a.status != "cancelada"]
-    }), 200
 
 @api.route('/signup', methods=['POST'])
 def signup():
@@ -239,84 +222,79 @@ def delete_patient(id):
         return jsonify({"msg": "Error al eliminar", "error": str(e)}), 500
 
 @api.route('/appointments', methods=['GET'])
-@jwt_required()
-def get_all_appointments():
-    appointments = Appointment.query.all()
-    return jsonify([a.serialize() for a in appointments]), 200
+def get_all_appointment():
+    result_all_appointment = db.session.execute(
+        select(Appointment)).scalars().all()
+    return jsonify([appointment.serialize() for appointment in result_all_appointment]), 200
+
 
 @api.route('/appointment/<int:appointment_id>', methods=['GET'])
-@jwt_required()
 def get_appointment(appointment_id):
     appointment = db.session.get(Appointment, appointment_id)
-    if not appointment:
+    if appointment is None:
         return jsonify({"msg": "Cita no encontrada"}), 404
     return jsonify(appointment.serialize()), 200
 
-@api.route('/appointments', methods=['POST'])
-@jwt_required()
+
+@api.route('/appointment', methods=['POST'])
 def add_appointment():
     data = request.get_json()
-   
-    patient = db.session.get(Patient, data.get("patient_id"))
-    if not patient:
-        return jsonify({"msg": "Paciente no encontrado"}), 404
-    
-    user_id = get_jwt_identity()
+    patient = db.session.execute(select(Patient).where(Patient.nombre == "prueba")).scalar_one_or_none()
 
-    try:       
-        new_appointment = Appointment(
-            patient_id=patient.patient_id,
-            user_id=user_id, 
-            date=data.get("date"),
-            start=data.get("start") or "00:00", 
-            end=data.get("end") or "00:00",     
-            status="pendiente",
-            reason=data.get("reason")
-        )
-        db.session.add(new_appointment)
+    if not patient:
+        patient = Patient(nombre=data["nombre"])
+        db.session.add(patient)
         db.session.commit()
-        return jsonify({
-            "msg": "Cita creada con éxito", 
-            "appointment": new_appointment.serialize()
-        }), 201
-    except Exception as e:
-        db.session.rollback()
-        print(f"🛑 ERROR AL CREAR CITA: {str(e)}")
-        return jsonify({"msg": "Error al crear cita", "error": str(e)}), 500
+
+    new_appointment = Appointment(
+        patient_id=patient.patient_id,
+        date=data["date"],
+        start=data["start"],
+        end=data["end"],
+        status="Active",
+        reason=data["reason"],
+        user_id= 1
+    )
+
+    db.session.add(new_appointment)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Appointment created successfully",
+        "appointment": new_appointment.serialize()
+    }), 201
 
 
 @api.route('/appointment/<int:appointment_id>', methods=['PUT'])
-@jwt_required()
 def update_appointment(appointment_id):
     data = request.get_json()
-    appointment = db.session.get(Appointment, appointment_id)
-
-    if not appointment:
+    print (data)
+    appointment_actualizate = db.session.get(Appointment, appointment_id)
+    if not appointment_actualizate:
         return jsonify({"msg": "Cita no encontrada"}), 404
 
-    if "date" in data:
-        appointment.date = data["date"]
-    if "time" in data:
-        appointment.time = data["time"]
-    if "status" in data:
-        appointment.status = data["status"]
-    if "reason" in data:
-        appointment.reason = data["reason"]
+    appointment_actualizate.date = data["date"],
+    appointment_actualizate.status = data["status"],
+    appointment_actualizate.start = data["start"],
+    appointment_actualizate.end = data["end"],
+    appointment_actualizate.reason = data["reason"],
+    appointment_actualizate.patient.nombre= data["nombre"],
+
+    print()
 
     db.session.commit()
-    return jsonify({"msg": "Cita actualizada", "appointment": appointment.serialize()}), 200
+
+    return jsonify({"mensaje": f"Usuario {appointment_id} actualizado", "datos":appointment_actualizate.serialize()}), 200
+
 
 @api.route('/appointment/<int:appointment_id>', methods=['DELETE'])
-@jwt_required()
 def delete_appointment(appointment_id):
-    appointment = db.session.get(Appointment, appointment_id)
-    if not appointment:
-        return jsonify({"msg": "La cita no existe"}), 404
 
-    try:
-        db.session.delete(appointment)
-        db.session.commit()
-        return jsonify({"msg": "Cita eliminada con éxito"}), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": str(e)}), 500
+    appointment_to_delete = db.session.execute(select(Appointment).where(
+        Appointment.appointment_id == appointment_id)).scalar_one_or_none()
+    if not appointment_to_delete:
+        return jsonify({"msg": "la cita no existe"}), 450
+
+    db.session.delete(appointment_to_delete)
+    db.session.commit()
+    return jsonify({"msg": "Eliminado con exito"}), 200

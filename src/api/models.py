@@ -34,7 +34,8 @@ class Patient(db.Model):
     email: Mapped[str] = mapped_column(String(120), nullable=True)
     telefono: Mapped[str] = mapped_column(String(20), nullable=True)
     nacimiento: Mapped[str] = mapped_column(String(20), nullable=True)
-    
+    appointments: Mapped[List["Appointment"]] = relationship(back_populates="patient")
+
     # Biometría y Constantes
     peso: Mapped[float] = mapped_column(Float, nullable=True)
     altura: Mapped[float] = mapped_column(Float, nullable=True)
@@ -44,23 +45,22 @@ class Patient(db.Model):
     grupo_sanguineo: Mapped[str] = mapped_column(String(10), nullable=True)
 
     # Riesgos y Bioseguridad (Guardamos "SI" o "NO")
-    embarazo: Mapped[str] = mapped_column(String(5), default="NO")
-    hepatitis: Mapped[str] = mapped_column(String(5), default="NO")
-    tuberculosis: Mapped[str] = mapped_column(String(5), default="NO")
-    vih: Mapped[str] = mapped_column(String(5), default="NO")
-    radiacion_cabeza: Mapped[str] = mapped_column(String(5), default="NO")
-    cancer: Mapped[str] = mapped_column(String(5), default="NO")
+    embarazo: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    hepatitis: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    tuberculosis: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    vih: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    radiacion_cabeza: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    cancer: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
 
     # Alergias
-    alergia_penicilina: Mapped[str] = mapped_column(String(5), default="NO")
-    alergia_terramicina: Mapped[str] = mapped_column(String(5), default="NO")
-    alergia_anestesia: Mapped[str] = mapped_column(String(5), default="NO")
-    alergia_latex: Mapped[str] = mapped_column(String(5), default="NO")
-    alergia_aines: Mapped[str] = mapped_column(String(5), default="NO")
+    alergia_penicilina: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    alergia_terramicina: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    alergia_anestesia: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    alergia_latex: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
+    alergia_aines: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
     alergia_otros: Mapped[str] = mapped_column(Text, nullable=True)
     anotaciones: Mapped[str] = mapped_column(Text, nullable=True)
 
-    appointments: Mapped[List["Appointment"]] = relationship(back_populates="patient")
    
     def serialize(self):
         return {
@@ -95,15 +95,15 @@ class Patient(db.Model):
 class Appointment(db.Model):
     __tablename__ = "appointment"
     appointment_id: Mapped[int] = mapped_column(primary_key=True)
-    patient_id: Mapped[int] = mapped_column(ForeignKey("patient.patient_id"), nullable=False)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
-    
+    patient_id: Mapped[int] = mapped_column(
+        ForeignKey("patient.patient_id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.user_id"), nullable=False)
     date: Mapped[str] = mapped_column(String(50), nullable=False)
     start: Mapped[str] = mapped_column(String(50), nullable=False)
     end: Mapped[str] = mapped_column(String(50), nullable=False)
     reason: Mapped[str] = mapped_column(String(200), nullable=True)
     status: Mapped[str] = mapped_column(String(50), default="pendiente")
-    
     user: Mapped["User"] = relationship(back_populates="appointments")
     patient: Mapped["Patient"] = relationship(back_populates="appointments")
 
