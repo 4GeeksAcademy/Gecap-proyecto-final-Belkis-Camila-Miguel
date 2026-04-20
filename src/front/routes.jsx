@@ -9,7 +9,6 @@ import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
 import Healthform from "./components/Healthform";
 import Login from "./pages/Login";
-import { AgendaMedica } from "./components/AgendaMedica";
 import { FichaPaciente } from "./components/FichaPaciente";
 import SignUp from "./pages/SignUp";
 import { Estadisticas } from "./components/Estadisticas";
@@ -37,7 +36,6 @@ export const router = createBrowserRouter(
         <Route element={<Home />} path="" />
         <Route path="/healthform" element={<Healthform />} />
         <Route element={<FichaPaciente />} path="/paciente" />
-        <Route element={<AgendaMedica />} path="/agenda" />
         <Route element={<AreaPersonal />} path="/areapersonal" />
         <Route element={<Estadisticas />} path="/estadisticas" />
         <Route path="/pacientes" element={<ListaPacientes />} />
