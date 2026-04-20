@@ -98,7 +98,7 @@ class Appointment(db.Model):
     patient_id: Mapped[int] = mapped_column(
         ForeignKey("patient.patient_id"), nullable=False)
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("user.user_id"), nullable=False)
+        ForeignKey("user.id"), nullable=False)
     date: Mapped[str] = mapped_column(String(50), nullable=False)
     start: Mapped[str] = mapped_column(String(50), nullable=False)
     end: Mapped[str] = mapped_column(String(50), nullable=False)

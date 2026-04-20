@@ -10,7 +10,7 @@ function AreaPersonal() {
     ///actualiza la lista de pacientes , con el use efect una vez al cargar la pagina, haciendo get =>
     //como aqui se traen los datos (GEt) aqui haremos el post tambien
     useEffect(() => {
-        fetch("https://special-train-g4vwpjx9pvqv3pvwv-3001.app.github.dev/api/appointments", {
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointments`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -31,7 +31,7 @@ function AreaPersonal() {
 
     const addAppointmentDataBase = async (nuevoPaciente) => {
         try {
-            const response = await fetch("https://special-train-g4vwpjx9pvqv3pvwv-3001.app.github.dev/api/appointment", {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -61,7 +61,7 @@ function AreaPersonal() {
 
     const eliminarPaciente = async (id) => {
         try {
-            const response = await fetch(`https://special-train-g4vwpjx9pvqv3pvwv-3001.app.github.dev/api/appointment/${id}`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment/api/appointment/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -79,22 +79,22 @@ function AreaPersonal() {
     };
 
     const actualizarCita = async (id, datosActualizados) => {
-    try {
-        const response = await fetch(`https://special-train-g4vwpjx9pvqv3pvwv-3001.app.github.dev/api/appointment/${id}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(datosActualizados)
-        });
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(datosActualizados)
+            });
 
-        if (response.ok) {
-            const citaEditada = await response.json();
-            setPacientesHoy(prev => prev.map(cita => cita.id === id ? citaEditada.datos : cita));
+            if (response.ok) {
+                const citaEditada = await response.json();
+                setPacientesHoy(prev => prev.map(cita => cita.id === id ? citaEditada.datos : cita));
+            }
+        } catch (error) {
+            console.log("Error al actualizar:", error);
         }
-    } catch (error) {
-        console.log("Error al actualizar:", error);
-    }
     };
 
     const citasNormalizadas = pacientesHoy.map(cita => ({
@@ -116,7 +116,7 @@ function AreaPersonal() {
     const proximaCita = proximasCitas[0] || null;
 
     return (
-        
+
 
         <div className="container-fluid" style={{ minHeight: "100vh" }}>
             <div className="card border-0 shadow-sm" style={{ borderRadius: "15px", overflow: "hidden" }}>

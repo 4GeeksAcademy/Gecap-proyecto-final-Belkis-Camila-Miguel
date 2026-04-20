@@ -12,28 +12,6 @@ api = Blueprint('api', __name__)
 
 CORS(api, resources={r"/*": {"origins": "*"}})
 
-
-    if not medico:
-        return jsonify({"msg": "Debe haber al menos un médico registrado en el sistema"}), 400
-
-    try:
-        new_app = Appointment(
-            user_id=medico.id,  
-            patient_id=None,
-            date=data.get("date"),            
-            start=data.get("start") or "00:00",
-            end=data.get("end") or "00:00",
-            reason=f"SOLICITUD WEB: {data.get('nombre')} - TEL: {data.get('telefono')} - MOTIVO: {data.get('motivo')}",
-            status="pendiente"
-        )
-        db.session.add(new_app)
-        db.session.commit()
-        return jsonify({"msg": "Solicitud enviada"}), 201
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"msg": "Error interno", "error": str(e)}), 500
-
-
 @api.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()

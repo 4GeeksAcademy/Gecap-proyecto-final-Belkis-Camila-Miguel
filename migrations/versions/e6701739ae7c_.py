@@ -1,8 +1,8 @@
-"""fusion total final
+"""empty message
 
-Revision ID: 2eab26e15f23
+Revision ID: e6701739ae7c
 Revises: 
-Create Date: 2026-04-20 17:23:04.795941
+Create Date: 2026-04-20 21:12:45.709728
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2eab26e15f23'
+revision = 'e6701739ae7c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -32,17 +32,17 @@ def upgrade():
     sa.Column('tension', sa.String(length=20), nullable=True),
     sa.Column('spo2', sa.Integer(), nullable=True),
     sa.Column('grupo_sanguineo', sa.String(length=10), nullable=True),
-    sa.Column('embarazo', sa.String(length=5), nullable=False),
-    sa.Column('hepatitis', sa.String(length=5), nullable=False),
-    sa.Column('tuberculosis', sa.String(length=5), nullable=False),
-    sa.Column('vih', sa.String(length=5), nullable=False),
-    sa.Column('radiacion_cabeza', sa.String(length=5), nullable=False),
-    sa.Column('cancer', sa.String(length=5), nullable=False),
-    sa.Column('alergia_penicilina', sa.String(length=5), nullable=False),
-    sa.Column('alergia_terramicina', sa.String(length=5), nullable=False),
-    sa.Column('alergia_anestesia', sa.String(length=5), nullable=False),
-    sa.Column('alergia_latex', sa.String(length=5), nullable=False),
-    sa.Column('alergia_aines', sa.String(length=5), nullable=False),
+    sa.Column('embarazo', sa.String(length=5), nullable=True),
+    sa.Column('hepatitis', sa.String(length=5), nullable=True),
+    sa.Column('tuberculosis', sa.String(length=5), nullable=True),
+    sa.Column('vih', sa.String(length=5), nullable=True),
+    sa.Column('radiacion_cabeza', sa.String(length=5), nullable=True),
+    sa.Column('cancer', sa.String(length=5), nullable=True),
+    sa.Column('alergia_penicilina', sa.String(length=5), nullable=True),
+    sa.Column('alergia_terramicina', sa.String(length=5), nullable=True),
+    sa.Column('alergia_anestesia', sa.String(length=5), nullable=True),
+    sa.Column('alergia_latex', sa.String(length=5), nullable=True),
+    sa.Column('alergia_aines', sa.String(length=5), nullable=True),
     sa.Column('alergia_otros', sa.Text(), nullable=True),
     sa.Column('anotaciones', sa.Text(), nullable=True),
     sa.PrimaryKeyConstraint('patient_id'),
