@@ -177,83 +177,91 @@ export const Estadisticas = () => {
     if (modo === "listado") {
         return (
             <div className="container-fluid p-4 animate__animated animate__fadeIn" style={{ backgroundColor: "#f4f7f6", minHeight: "100vh" }}>
+                <div style={{
+                    position: "sticky",
+                    top: "0",
+                    zIndex: "1030",
+                    backgroundColor: "#f4f7f6",
+                    paddingTop: "5px",
+                    paddingBottom: "1px"
+                }}>
+                    <div className="card border-0 shadow-sm p-3 mb-4" style={{ borderRadius: "20px" }}>
+                        <div className="row g-2 align-items-end">
 
-                <div className="card border-0 shadow-sm p-3 mb-4" style={{ borderRadius: "20px" }}>
-                    <div className="row g-2 align-items-end">
-
-                        <div className="col-lg-3 col-md-12">
-                            <label className="small fw-bold mb-1 d-block text-muted" style={{ fontSize: '0.7rem' }}>MODO:</label>
-                            <div className="btn-group w-100 shadow-sm" style={{ borderRadius: "10px", overflow: "hidden" }}>
-                                {['semana', 'mes', 'año', 'rango'].map((p) => (
-                                    <button
-                                        key={p}
-                                        className={`btn btn-sm py-2 fw-bold ${tipoPeriodo === p ? 'btn-dark' : 'btn-light'}`}
-                                        style={{ border: "none", fontSize: "0.65rem", backgroundColor: tipoPeriodo === p ? "#566873" : "#fff" }}
-                                        onClick={() => setTipoPeriodo(p)}
-                                    >
-                                        {p.toUpperCase()}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="col-lg-5 col-md-6">
-                            <label className="small fw-bold mb-1 d-block text-muted" style={{ fontSize: '0.7rem' }}>FECHA / PERIODO:</label>
-                            {tipoPeriodo === "rango" ? (
-                                <div className="d-flex gap-2">
-                                    <input type="date" className="form-control form-control-sm border-0 bg-light shadow-sm" style={{ borderRadius: "10px" }} value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} />
-                                    <input type="date" className="form-control form-control-sm border-0 bg-light shadow-sm" style={{ borderRadius: "10px" }} value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} />
-                                </div>
-                            ) : tipoPeriodo === "año" ? (
-                                <select
-                                    className="form-select form-select-sm border-0 bg-light shadow-sm text-center"
-                                    style={{ borderRadius: "10px", height: "35px", fontWeight: "bold", color: "#566873" }}
-                                    value={fechaReferencia}
-                                    onChange={(e) => setFechaReferencia(e.target.value)}
-                                >
-                                    {Array.from({ length: 2035 - 2015 + 1 }, (_, i) => 2015 + i).map((anio) => (
-                                        <option key={anio} value={anio}>{anio}</option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <input
-                                    type={tipoPeriodo === 'mes' ? "month" : "date"}
-                                    className="form-control form-control-sm border-0 bg-light shadow-sm text-center"
-                                    style={{ borderRadius: "10px", height: "35px", fontWeight: "bold", color: "#566873" }}
-                                    value={fechaReferencia}
-                                    onChange={(e) => setFechaReferencia(e.target.value)}
-                                />
-                            )}
-                        </div>
-
-                        <div className="col-lg-4 col-md-6">
-                            <label className="small fw-bold mb-1 d-block text-muted" style={{ fontSize: '0.7rem' }}>PACIENTES:</label>
-                            <div className="dropdown">
-                                <button className="btn btn-sm btn-white w-100 shadow-sm text-start d-flex justify-content-between align-items-center border-0" type="button" data-bs-toggle="dropdown" style={{ borderRadius: "10px", height: "35px", backgroundColor: "white" }}>
-                                    <span className="text-truncate" style={{ fontSize: '0.8rem' }}>
-                                        {pacientesSeleccionados.length === 0 ? "Todos los pacientes" : `${pacientesSeleccionados.length} seleccionados`}
-                                    </span>
-                                    <i className="fas fa-chevron-down text-muted small"></i>
-                                </button>
-                                <ul className="dropdown-menu w-100 border-0 shadow-lg p-2" style={{ borderRadius: "15px", maxHeight: "250px", overflowY: "auto" }}>
-                                    <li>
-                                        <button className="dropdown-item rounded fw-bold text-primary" onClick={() => setPacientesSeleccionados([])} style={{ fontSize: '0.8rem' }}>
-                                            Ver Todos (Global)
+                            <div className="col-lg-3 col-md-12">
+                                <label className="small fw-bold mb-1 d-block text-muted" style={{ fontSize: '0.7rem' }}>MODO:</label>
+                                <div className="btn-group w-100 shadow-sm" style={{ borderRadius: "10px", overflow: "hidden" }}>
+                                    {['semana', 'mes', 'año', 'rango'].map((p) => (
+                                        <button
+                                            key={p}
+                                            className={`btn btn-sm py-2 fw-bold ${tipoPeriodo === p ? 'btn-dark' : 'btn-light'}`}
+                                            style={{ border: "none", fontSize: "0.65rem", backgroundColor: tipoPeriodo === p ? "#566873" : "#fff" }}
+                                            onClick={() => setTipoPeriodo(p)}
+                                        >
+                                            {p.toUpperCase()}
                                         </button>
-                                    </li>
-                                    <li><hr className="dropdown-divider" /></li>
-                                    {store.pacientes && store.pacientes.map(p => (
-                                        <li key={p.id} className="dropdown-item d-flex align-items-center rounded py-1" onClick={(e) => e.stopPropagation()} style={{ fontSize: '0.8rem' }}>
-                                            <input
-                                                type="checkbox"
-                                                className="form-check-input me-2"
-                                                checked={pacientesSeleccionados.some(sel => sel.id === p.id)}
-                                                onChange={() => togglePaciente(p)}
-                                            />
-                                            {p.nombre} {p.apellidos}
-                                        </li>
                                     ))}
-                                </ul>
+                                </div>
+                            </div>
+
+                            <div className="col-lg-5 col-md-6">
+                                <label className="small fw-bold mb-1 d-block text-muted" style={{ fontSize: '0.7rem' }}>FECHA / PERIODO:</label>
+                                {tipoPeriodo === "rango" ? (
+                                    <div className="d-flex gap-2">
+                                        <input type="date" className="form-control form-control-sm border-0 bg-light shadow-sm" style={{ borderRadius: "10px" }} value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} />
+                                        <input type="date" className="form-control form-control-sm border-0 bg-light shadow-sm" style={{ borderRadius: "10px" }} value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} />
+                                    </div>
+                                ) : tipoPeriodo === "año" ? (
+                                    <select
+                                        className="form-select form-select-sm border-0 bg-light shadow-sm text-center"
+                                        style={{ borderRadius: "10px", height: "35px", fontWeight: "bold", color: "#566873" }}
+                                        value={fechaReferencia}
+                                        onChange={(e) => setFechaReferencia(e.target.value)}
+                                    >
+                                        {Array.from({ length: 2035 - 2015 + 1 }, (_, i) => 2015 + i).map((anio) => (
+                                            <option key={anio} value={anio}>{anio}</option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <input
+                                        type={tipoPeriodo === 'mes' ? "month" : "date"}
+                                        className="form-control form-control-sm border-0 bg-light shadow-sm text-center"
+                                        style={{ borderRadius: "10px", height: "35px", fontWeight: "bold", color: "#566873" }}
+                                        value={fechaReferencia}
+                                        onChange={(e) => setFechaReferencia(e.target.value)}
+                                    />
+                                )}
+                            </div>
+
+                            <div className="col-lg-4 col-md-6">
+                                <label className="small fw-bold mb-1 d-block text-muted" style={{ fontSize: '0.7rem' }}>PACIENTES:</label>
+                                <div className="dropdown">
+                                    <button className="btn btn-sm btn-white w-100 shadow-sm text-start d-flex justify-content-between align-items-center border-0" type="button" data-bs-toggle="dropdown" style={{ borderRadius: "10px", height: "35px", backgroundColor: "white" }}>
+                                        <span className="text-truncate" style={{ fontSize: '0.8rem' }}>
+                                            {pacientesSeleccionados.length === 0 ? "Todos los pacientes" : `${pacientesSeleccionados.length} seleccionados`}
+                                        </span>
+                                        <i className="fas fa-chevron-down text-muted small"></i>
+                                    </button>
+                                    <ul className="dropdown-menu w-100 border-0 shadow-lg p-2" style={{ borderRadius: "15px", maxHeight: "250px", overflowY: "auto" }}>
+                                        <li>
+                                            <button className="dropdown-item rounded fw-bold text-primary" onClick={() => setPacientesSeleccionados([])} style={{ fontSize: '0.8rem' }}>
+                                                Ver Todos (Global)
+                                            </button>
+                                        </li>
+                                        <li><hr className="dropdown-divider" /></li>
+                                        {store.pacientes && store.pacientes.map(p => (
+                                            <li key={p.id} className="dropdown-item d-flex align-items-center rounded py-1" onClick={(e) => e.stopPropagation()} style={{ fontSize: '0.8rem' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    className="form-check-input me-2"
+                                                    checked={pacientesSeleccionados.some(sel => sel.id === p.id)}
+                                                    onChange={() => togglePaciente(p)}
+                                                />
+                                                {p.nombre} {p.apellidos}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -281,23 +289,79 @@ export const Estadisticas = () => {
                     </div>
 
                     <div className="col-md-3">
-                        <div className="card border-0 shadow-sm p-4 text-white h-100 text-center d-flex flex-column" style={{ backgroundColor: "#566873", borderRadius: "20px" }}>
-                            <div className="pt-5 mb-4">
-                                <h2 className="display-4 fw-bold mb-0">{totalConsultas}</h2>
-                                <p className="opacity-75 small">
-                                    {pacientesSeleccionados.length === 0 ? `Consultas totales (${tipoPeriodo})` : `Consultas de selección (${tipoPeriodo})`}
+                        <div className="card border-0 shadow-sm p-3 text-white h-100 text-center d-flex flex-column"
+                            style={{ backgroundColor: "#566873", borderRadius: "20px", overflow: "hidden" }}>
+
+                            <div className="mb-2">
+                                <h2 className="fw-bold mb-0" style={{ fontSize: "2rem", lineHeight: "1.1" }}>{totalConsultas}</h2>
+                                <p className="text-uppercase fw-bold opacity-50 mb-0" style={{ fontSize: "0.55rem", letterSpacing: "0.5px" }}>
+                                    {
+                                        pacientesSeleccionados.length > 0
+                                            ? `Consultas de selección (${tipoPeriodo})`
+                                            : {
+                                                semana: "Consultas esta semana",
+                                                mes: "Consultas este mes",
+                                                año: "Consultas este año",
+                                                rango: "Consultas en el rango"
+                                            }[tipoPeriodo]
+                                    }
                                 </p>
                             </div>
-                            <div className="d-grid gap-2 mt-auto">
-                                <button
-                                    className="btn btn-sm fw-bold shadow-sm py-2"
-                                    style={{ backgroundColor: "#93bbbf", color: "white", borderRadius: "12px" }}
-                                    onClick={() => setModo("detalle")}
+
+                            <div className="mb-3 px-1">
+                                <select
+                                    className="form-select form-select-sm border-0 bg-white bg-opacity-10 text-white fw-bold shadow-none"
+                                    style={{
+                                        borderRadius: "8px",
+                                        fontSize: "0.65rem",
+                                        cursor: "pointer",
+                                        border: "1px solid rgba(255,255,255,0.1)",
+                                        backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://w3.org' viewBox='0 0 16 16' fill='white'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e\")"
+                                    }}
+                                    value={filtroTarta}
+                                    onChange={(e) => setFiltroTarta(e.target.value)}
                                 >
-                                    <i className="fas fa-chart-pie me-2"></i> Ver Detalles
-                                </button>
-                                <button className="btn btn-sm fw-bold shadow-sm py-2" style={{ backgroundColor: "#ffffff", color: "#566873", borderRadius: "12px" }} onClick={() => window.print()}>
-                                    <i className="fas fa-print me-2"></i> Imprimir Informe
+                                    <option value="motivo" className="text-dark">Motivo de consulta</option>
+                                    <option value="alertas" className="text-dark">Alertas de salud</option>
+                                    <option value="genero" className="text-dark">Distribución por género</option>
+                                </select>
+                            </div>
+
+                            <div className="flex-grow-1 d-flex align-items-center justify-content-center" style={{ minHeight: "150px" }}>
+                                <div style={{ width: "100%", height: "150px" }}>
+                                    <Pie
+                                        key={filtroTarta}
+                                        data={dataTarta}
+                                        options={{
+                                            responsive: true,
+                                            maintainAspectRatio: false,
+                                            plugins: {
+                                                legend: { display: false },
+                                                tooltip: {
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                    titleColor: '#566873',
+                                                    bodyColor: '#566873',
+                                                    cornerRadius: 10
+                                                }
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="mt-3">
+                                <button
+                                    className="btn btn-sm fw-bold w-100 shadow-sm"
+                                    style={{
+                                        backgroundColor: "#ffffff",
+                                        color: "#566873",
+                                        borderRadius: "10px",
+                                        padding: "8px",
+                                        fontSize: "0.65rem"
+                                    }}
+                                    onClick={() => window.print()}
+                                >
+                                    <i className="fas fa-print me-2"></i> IMPRIMIR INFORME
                                 </button>
                             </div>
                         </div>
@@ -306,7 +370,9 @@ export const Estadisticas = () => {
 
                 <div className="card border-0 shadow-sm" style={{ borderRadius: "20px" }}>
                     <div className="p-4 border-bottom d-flex justify-content-between align-items-center">
-                        <h6 className="fw-bold m-0" style={{ color: "#566873" }}>Listado de Pacientes y Consultas</h6>
+                        <h6 className="fw-bold m-0" style={{ color: "#566873" }}>
+                            {pacientesSeleccionados.length > 0 ? "Detalle de Pacientes Seleccionados" : "Pacientes en este Periodo"}
+                        </h6>
                         <div className="input-group input-group-sm" style={{ width: "250px" }}>
                             <span className="input-group-text bg-light border-0" style={{ borderRadius: "10px 0 0 10px" }}>
                                 <i className="fas fa-search text-muted"></i>
@@ -314,7 +380,7 @@ export const Estadisticas = () => {
                             <input
                                 type="text"
                                 className="form-control border-0 bg-light"
-                                placeholder="Buscar paciente..."
+                                placeholder="Buscar por nombre..."
                                 style={{ borderRadius: "0 10px 10px 0" }}
                                 value={busquedaTabla}
                                 onChange={(e) => setBusquedaTabla(e.target.value)}
@@ -333,45 +399,81 @@ export const Estadisticas = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {store.pacientes && store.pacientes
-                                    .filter(p => p.nombre.toLowerCase().includes(busquedaTabla.toLowerCase()))
-                                    .map((paciente) => (
-                                        <tr key={paciente.id}>
-                                            <td className="ps-3">
-                                                <div className="fw-bold small">17 Abr, 2024</div>
-                                                <div className="text-muted" style={{ fontSize: "0.7rem" }}>09:00 AM</div>
-                                            </td>
-                                            <td>
-                                                <div className="fw-bold small" style={{ color: "#566873" }}>{paciente.nombre}</div>
-                                                <div className="text-muted" style={{ fontSize: "0.7rem" }}>ID: #{paciente.id.toString().padStart(4, '0')}</div>
-                                            </td>
-                                            <td className="small text-muted">Control rutinario post-operatorio</td>
-                                            <td>
-                                                <span className="badge" style={{ backgroundColor: "rgba(147, 187, 191, 0.2)", color: "#93bbbf", fontSize: "0.65rem" }}>Completado</span>
-                                            </td>
-                                            <td className="text-end pe-3">
-                                                <div className="d-flex gap-2 justify-content-end">
-                                                    <button
-                                                        className="btn btn-sm shadow-sm text-white"
-                                                        style={{ backgroundColor: "#93bbbf", borderRadius: "8px", border: "none" }}
-                                                        onClick={() => {
-                                                            dispatch({ type: "select_patient", payload: paciente });
-                                                            navigate("/paciente");
-                                                        }}
-                                                    >
-                                                        <i className="fas fa-eye me-1"></i> Detalle
-                                                    </button>
-                                                    <button
-                                                        className="btn btn-sm shadow-sm text-white"
-                                                        style={{ backgroundColor: "#566873", borderRadius: "8px", border: "none" }}
-                                                        onClick={() => window.print()}
-                                                    >
-                                                        <i className="fas fa-print me-1"></i> Informe
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                {/* LÓGICA DE FILTRADO DINÁMICO */}
+                                {(store.appointments || [])
+                                    .filter(cita => {
+                                        const fechaCita = new Date(cita.date);
+                                        const hoy = new Date(fechaReferencia);
+
+                                        // 1. Filtrar por tipo de periodo
+                                        let coincidePeriodo = false;
+                                        if (tipoPeriodo === "año") coincidePeriodo = fechaCita.getFullYear() === hoy.getFullYear();
+                                        if (tipoPeriodo === "mes") coincidePeriodo = (fechaCita.getMonth() === hoy.getMonth() && fechaCita.getFullYear() === hoy.getFullYear());
+                                        if (tipoPeriodo === "semana") {
+                                            // Lógica simplificada: misma semana del año (puedes ajustarla según necesites)
+                                            coincidePeriodo = true; // Por ahora dejamos pasar para mostrar datos, aquí iría tu lógica de semanas
+                                        }
+                                        if (tipoPeriodo === "rango") {
+                                            coincidePeriodo = cita.date >= fechaInicio && cita.date <= fechaFin;
+                                        }
+
+                                        // 2. Filtrar por pacientes seleccionados (si hay alguno)
+                                        const coincidePaciente = pacientesSeleccionados.length === 0 ||
+                                            pacientesSeleccionados.some(p => p.id === cita.patient_id);
+
+                                        return coincidePeriodo && coincidePaciente;
+                                    })
+                                    .map((cita) => {
+                                        // Buscamos los datos del paciente para esta cita
+                                        const paciente = store.pacientes.find(p => p.id === cita.patient_id);
+                                        if (!paciente) return null;
+
+                                        // Filtro de búsqueda por texto
+                                        if (busquedaTabla && !paciente.nombre.toLowerCase().includes(busquedaTabla.toLowerCase())) return null;
+
+                                        return (
+                                            <tr key={cita.id}>
+                                                <td className="ps-3">
+                                                    <div className="fw-bold small">{new Date(cita.date).toLocaleDateString()}</div>
+                                                    <div className="text-muted" style={{ fontSize: "0.7rem" }}>{cita.time || "09:00 AM"}</div>
+                                                </td>
+                                                <td>
+                                                    <div className="fw-bold small" style={{ color: "#566873" }}>{paciente.nombre} {paciente.apellidos}</div>
+                                                    <div className="text-muted" style={{ fontSize: "0.7rem" }}>ID: #{paciente.id.toString().padStart(4, '0')}</div>
+                                                </td>
+                                                <td className="small text-muted">{cita.reason || "Control rutinario"}</td>
+                                                <td>
+                                                    <span className="badge" style={{ backgroundColor: "rgba(147, 187, 191, 0.2)", color: "#93bbbf", fontSize: "0.65rem" }}>
+                                                        {cita.status || "Completado"}
+                                                    </span>
+                                                </td>
+                                                <td className="text-end pe-3">
+                                                    <div className="d-flex gap-2 justify-content-end">
+                                                        <button
+                                                            className="btn btn-sm shadow-sm text-white d-flex align-items-center"
+                                                            style={{
+                                                                backgroundColor: "#93bbbf",
+                                                                borderRadius: "8px",
+                                                                border: "none",
+                                                                padding: "6px 12px",
+                                                                fontSize: "0.75rem",
+                                                                fontWeight: "bold",
+                                                                transition: "all 0.3s ease"
+                                                            }}
+                                                            onClick={() => {
+                                                                dispatch({ type: "select_patient", payload: paciente });
+                                                                navigate("/paciente");
+                                                            }}
+                                                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#7da9ad"}
+                                                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#93bbbf"}
+                                                        >
+                                                            <i className="fas fa-eye me-2"></i> Ver detalles
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                             </tbody>
                         </table>
                     </div>
@@ -379,81 +481,4 @@ export const Estadisticas = () => {
             </div>
         );
     }
-
-    return (
-        <div className="container-fluid p-4 animate__animated animate__fadeIn">
-            <button
-                className="btn btn-link text-decoration-none mb-3 p-0"
-                style={{ color: "#566873" }}
-                onClick={() => setModo("listado")}
-            >
-                <i className="fas fa-arrow-left me-2"></i> Volver a la gráfica
-            </button>
-
-            <div className="card border-0 shadow-sm p-4 mb-4" style={{ borderRadius: "20px" }}>
-                <h4 className="fw-bold mb-4" style={{ color: "#566873" }}>Análisis Detallado de Consultas</h4>
-
-                <div className="row mb-4">
-                    <div className="col-md-4 mb-3">
-                        <div className="p-3 bg-light rounded-4 text-center border-0 shadow-sm">
-                            <h6 className="text-muted small text-uppercase fw-bold">Promedio Diario</h6>
-                            <h3 className="fw-bold" style={{ color: "#e8888c" }}>4.2</h3>
-                        </div>
-                    </div>
-                    <div className="col-md-4 mb-3">
-                        <div className="p-3 bg-light rounded-4 text-center border-0 shadow-sm">
-                            <h6 className="text-muted small text-uppercase fw-bold">Pico de Consultas</h6>
-                            <h3 className="fw-bold" style={{ color: "#93bbbf" }}>Martes</h3>
-                        </div>
-                    </div>
-                    <div className="col-md-4 mb-3">
-                        <div className="p-3 bg-light rounded-4 text-center border-0 shadow-sm">
-                            <h6 className="text-muted small text-uppercase fw-bold">Motivo más frecuente</h6>
-                            <h3 className="fw-bold" style={{ color: "#566873" }}>Control</h3>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="row justify-content-center">
-                    <div className="col-lg-8 col-md-10">
-                        <div className="p-4 bg-white border rounded-4 shadow-sm">
-                            
-                            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center mb-4 gap-2">
-                                <h5 className="fw-bold m-0" style={{ color: "#566873" }}>Análisis de Distribución</h5>
-
-                                <select
-                                    className="form-select form-select-sm border-0 bg-light fw-bold"
-                                    style={{ borderRadius: "10px", color: "#566873", width: "auto", minWidth: "180px" }}
-                                    value={filtroTarta}
-                                    onChange={(e) => setFiltroTarta(e.target.value)}
-                                >
-                                    <option value="motivo">Por Motivo de Consulta</option>
-                                    <option value="alertas">Por Alertas de Salud</option>
-                                    <option value="genero">Por Género</option>
-                                </select>
-                            </div>
-
-                            {/* GRÁFICA */}
-                            <div style={{ height: "300px" }}>
-                                <Pie
-                                    key={filtroTarta}
-                                    data={dataTarta}
-                                    options={{
-                                        responsive: true,
-                                        maintainAspectRatio: false,
-                                        plugins: {
-                                            legend: {
-                                                position: 'bottom',
-                                                labels: { usePointStyle: true, padding: 20, font: { size: 12 } }
-                                            }
-                                        }
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
 }
