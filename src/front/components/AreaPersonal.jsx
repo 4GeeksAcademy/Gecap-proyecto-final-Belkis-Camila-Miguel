@@ -59,7 +59,7 @@ function AreaPersonal() {
 
     const eliminarPaciente = async (id) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment/api/appointment/${id}`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("token")}`

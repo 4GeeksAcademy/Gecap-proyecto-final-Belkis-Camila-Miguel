@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function ModalCitas({ paciente, onClose }) {
+function ModalCitas({ paciente, onClose, onMarcarAsistencia }) {
     const [descargarDoc, setDescargarDoc] = useState(false);
     const [descargarJustificante, setDescargarJustificante] = useState(false)
 
@@ -10,7 +10,6 @@ function ModalCitas({ paciente, onClose }) {
         const data = {
 
             "data": {
-                "nombre": nombre,
                 "date": paciente.start ? new Date(paciente.start).toLocaleDateString() : "---",
             },
             "template_id": "2e377b2354808d98",
@@ -84,7 +83,7 @@ function ModalCitas({ paciente, onClose }) {
 
     return (
         <div>
-            <div className="modal show modal-xl bg-dark bg-opacity-75 d-block"  tabIndex="-1" role="dialog">
+            <div className="modal show modal-xl bg-dark bg-opacity-75 d-block" tabIndex="-1" role="dialog">
                 <div className="modal-dialog" role="document">
                     <div className="modal-content">
                         <div className="modal-header">
@@ -94,12 +93,13 @@ function ModalCitas({ paciente, onClose }) {
                         <div className="modal-footer d-flex justify-content-center gap-2 text-light">
                             <button type="button"
                                 className="btn shadow-sm text-light"
-                                style={{ backgroundColor: "#5e888c" }}> Asistió
+                                style={{ backgroundColor: "#5e888c" }} > Asistio
                             </button>
                             <button
                                 type="button"
                                 className="btn shadow-sm text-light"
-                                style={{ backgroundColor: "#5e888c" }}> No Asistió
+                                style={{ backgroundColor: "#5e888c" }}
+                                  > No Asistió
                             </button>
                             <button type="button"
                                 className="btn shadow-sm text-light"
@@ -109,13 +109,11 @@ function ModalCitas({ paciente, onClose }) {
                             <button
                                 type="button"
                                 className="btn shadow-sm text-light"
-                                style={{ backgroundColor: "#566873"}}
+                                style={{ backgroundColor: "#566873" }}
                                 onClick={firmarPdf}
                                 disabled={descargarDoc}                            >
-                                {descargarDoc ? "Descargando..." : "descargar PDF"}
+                                {descargarDoc ? "Descargando..." : "Proteccion datos"}
                             </button>
-
-                            <button type="button" className="btn shadow-sm text-light" style={{ backgroundColor: "#566873" }}>Finalizar</button>
                         </div>
                     </div>
                 </div>

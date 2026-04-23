@@ -3,7 +3,7 @@ import { DayPilot, DayPilotCalendar } from "@daypilot/daypilot-lite-react";
 import ModalCitas from "./ModalCitas";
 
 
-const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacientesHoy, onActualizarCita }) => {
+const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacientesHoy, onActualizarCita, seleccionarVista }) => {
 
     const [calendar, setCalendar] = useState(null);
     const [showModal, setShowModal] = useState(false);
@@ -20,26 +20,27 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
         otroMotivo: ""
     });
 
-        useEffect(() => {
-            if (!calendar || calendar.disposed())
-                return;
+    useEffect(() => {
+        if (!calendar || calendar.disposed())
+            return;
 
-            calendar.update({
-                startDate: new DayPilot.Date(fechaSeleccionada),
-                events: pacientesHoy.map(p => ({
-                    id: p.id,
-                    text: `${p.nombre || p.patient_name || "Paciente"} - ${p.motivo || p.reason || "Consulta"}`,
-                    start: p.start,
-                    end: p.end,
-                    backColor: "#93c47d",
-                })),
+        calendar.update({
+            viewType: seleccionarVista,
+            startDate: new DayPilot.Date(fechaSeleccionada),
+            columns: seleccionarVista === "Day" ? [{ name: "Agenda Médica", id: "C1" }] : undefined,
+            events: pacientesHoy.map(p => ({
+                id: p.id,
+                text: `${p.nombre || p.patient_name || "Paciente"} - ${p.motivo || p.reason || "Consulta"}`,
+                start: p.start,
+                end: p.end,
+                backColor: "#93c47d",
+            })),
 
-            });
-        }, [calendar, fechaSeleccionada, pacientesHoy]);
+        });
+    }, [calendar, fechaSeleccionada, pacientesHoy, seleccionarVista]);
 
 
     const handleGuardarCita = () => {
-        // Validaciones
         if (!formData.nombre.trim()) {
             alert("El nombre es obligatorio");
             return;
@@ -100,25 +101,29 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
     };
 
     const config = {
-        viewType: "Week",
+        viewType: seleccionarVista,
         headerDateFormat: "dd/MM/yyyy",
-        columns: [{ name: "Agenda Médica", id: "C1" }],
+        columns: seleccionarVista === "Day" ? [{ name: "Agenda Médica", id: "C1" }] : undefined,
+        cellDuration: 10,
         dayBeginsHour: 10,
         dayEndsHour: 21,
         businessBeginsHour: 10,
         businessEndsHour: 21,
+        showCurrentTimeLine: true,
+        currentTimeLineColor: "red",
         heightSpec: "BusinessHoursNoScroll",
         headerHeight: 50,
         cellHeight: 40,
         theme: "calendar_default",
         durationBarVisible: false,
 
+
         onEventClick: async (args) => {
-        const e = args.e;
-        const datosPaciente = pacientesHoy.find(p => p.id === e.id());
-        setSeleccionarCita(datosPaciente);
-        setMostrarModal(true);
-    },
+            const e = args.e;
+            const datosPaciente = pacientesHoy.find(p => p.id === e.id());
+            setSeleccionarCita(datosPaciente);
+            setMostrarModal(true);
+        },
 
         onTimeRangeSelected: async (args) => {
             setSelectedRange({
@@ -150,6 +155,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                     text: "X",
                     style: "cursor:pointer; background-color: rgba(0,0,0,0.2); border-radius: 50%; text-align: center; line-height: 18px;",
                     onClick: (argsArea) => {
+                        argsArea.originalEvent.stopPropagation();
                         onEliminarCita(argsArea.source.id());
                     }
                 },
@@ -161,6 +167,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                     text: "✎",
                     style: "cursor:pointer; background-color: rgba(0,0,0,0.2); border-radius: 50%; text-align: center; line-height: 18px;",
                     onClick: async (argsArea) => {
+                        argsArea.originalEvent.stopPropagation();
                         const citaActual = argsArea.source.data;
 
                         const nombreActual = citaActual.text?.split(" - ")[0] || "";

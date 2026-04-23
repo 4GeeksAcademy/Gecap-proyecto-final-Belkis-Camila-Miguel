@@ -14,7 +14,6 @@ export const Sidebar = () => {
     const menuItems = [
         { name: "Área personal", path: "/areapersonal", icon: "fas fa-notes-medical" },
         { name: "Estadisticas", path: "/estadisticas", icon: "fas fa-chart-line" },
-        { name: "Agenda Médica", path: "/agenda", icon: "fas fa-calendar-alt" },
         { name: "Listado de Pacientes", path: "/pacientes", icon: "fas fa-users" }, // Dejamos este como principal
     ];
 

@@ -274,32 +274,3 @@ def delete_appointment(appointment_id):
     db.session.commit()
     return jsonify({"msg": "Eliminado con exito"}), 200
 
-@api.route('/appointment/<int:appointment_id>/dataprotection', methods=['GET'])
-def get_dataprotection(appointment_id):
-    appointment = db.session.get(Appointment, appointment_id)
-    if appointment is None:
-        return jsonify({"msg": "Cita no encontrada"}), 404
-    payload = {
-        "data": {"nombre": "Belkis"},
-        "template_id": "80e77b235475876c",
-        "export_type": "json",
-        "expiration": 60,
-        "load_async": False
-    }
-        
-   
-
-    response = requests.post(
-        "https://craftmypdf.com",
-        json=payload,
-        headers=headers
-    )
-
-    if response.status_code == 200:
-        data_json = response.json()
-        pdf_url = data_json.get("file")
-        appointmentAux = appointment.serialize()
-        appointmentAux.pdfUrl = pdf_url
-        return jsonify(), 200
-    else:
-        return jsonify({"error": "Error en CraftMyPDF", "details": response.text}), response.status_code

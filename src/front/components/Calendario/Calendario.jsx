@@ -6,10 +6,13 @@ import CitasPorDia from './Citaspordia';
 import "../Calendario/Calendario.css";
 
 
+
 function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCita}) {
 
     const [startDate, setStartDate] = useState(new Date());
+    const [seleccionarVista, setSeleccionarVista]= useState("Day")
 
+    
     const manejarSeleccionDia = (date) => {
         setStartDate(date);
     };
@@ -26,11 +29,16 @@ function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCi
                                 year: 'numeric'
                             })}
                         </strong>
-                        <h5 className="badge rounded-3 text-light px-3 py-2 fw-bold " 
-                            style={{ backgroundColor: "#93bbbf", fontSize: "1rem", }}
-                        >
-                            Hoy
-                        </h5>
+                        <div className="dropdown">
+                            <button className="btn dropdown-toggle text-light fw-bold" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                             style={{backgroundColor:"#93bbbf"}}>
+                               Ver por: {seleccionarVista === "Day" ? "Día" : "Semana"}
+                            </button>
+                            <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <button className="dropdown-item" onClick={() => setSeleccionarVista("Day")} >Dia</button>
+                                <button className="dropdown-item" onClick={()=>setSeleccionarVista("Week")}>Semana</button>
+                            </div>
+                        </div>
 
                     </div>
 
@@ -40,6 +48,7 @@ function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCi
                         onEliminarCita={onEliminarCita}
                         pacientesHoy={pacienteHoy}
                         onActualizarCita={onActualizarCita}
+                        seleccionarVista={seleccionarVista}
                     />
                 </div>
 
@@ -51,7 +60,7 @@ function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCi
                         locale={es}
                         outsideClickIgnoreClass="react-datepicker__day--outside-month"
                     />
-                    <button className="btn fw-bold shadow-sm w-100" style={{ backgroundColor: "#93bbbf", color: "white", letterSpacing: "0.7px" }}>
+                    <button className="btn fw-bold shadow-sm w-100 text-light" style={{ backgroundColor: "#93bbbf", letterSpacing: "0.7px" }}>
                         + Nueva cita
                     </button>
                 </div>
