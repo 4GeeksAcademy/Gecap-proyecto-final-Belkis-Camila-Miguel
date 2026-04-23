@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify, url_for, Blueprint, current_app
-from api.models import db, User, Patient, Appointment
+from api.models import db, User, Patient, Appointment, Message
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from sqlalchemy import select
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from flask_bcrypt import Bcrypt
+
 
 bcrypt = Bcrypt()
 
@@ -276,3 +277,31 @@ def delete_appointment(appointment_id):
     db.session.delete(appointment_to_delete)
     db.session.commit()
     return jsonify({"msg": "Eliminado con exito"}), 200
+
+@api.route('/external-appointment', methods=['POST'])
+def handle_external_appointment():
+    data = request.get_json()     
+   
+    nombre = data.get("nombre")
+    dni = data.get("dni")
+    telefono = data.get("telefono")
+    motivo = data.get("motivo")
+    
+    if not nombre or not telefono or not dni:
+        return jsonify({"msg": "Nombre, DNI y teléfono son requeridos"}), 400
+
+    try:        
+        nuevo_mensaje = Message(
+            full_name=nombre,
+            dni=dni.upper(),
+            phone=telefono,
+            reason=motivo
+        )
+        db.session.add(nuevo_mensaje)
+        db.session.commit()
+        
+        return jsonify({"msg": "Mensaje enviado al médico correctamente"}), 201
+    except Exception as e:
+        db.session.rollback()       
+        print(f"Error en el servidor: {str(e)}")
+        return jsonify({"msg": "Error al procesar la solicitud", "error": str(e)}), 500

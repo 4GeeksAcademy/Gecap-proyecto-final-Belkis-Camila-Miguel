@@ -3,18 +3,42 @@ import React, { useState } from "react";
 export const CitaRapida = () => {
     const [datos, setDatos] = useState({ 
         nombre: "", 
+        dni: "", // 1. Añadido DNI al estado
         telefono: "", 
         fecha: "", 
         motivo: "",
         otroMotivo: "" 
     });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();       
-        const motivoFinal = datos.motivo === "Otro" ? datos.otroMotivo : datos.motivo;
-        
-        console.log("Datos finales a enviar:", { ...datos, motivo: motivoFinal });
-        alert(`Solicitud enviada. Motivo: ${motivoFinal}`);
+        const motivoFinal = datos.motivo === "Otro" ? datos.otroMotivo : datos.motivo;        
+       
+        const solicitudParaEnviar = {
+            nombre: datos.nombre,
+            dni: datos.dni, // 2. Enviamos el DNI al backend
+            telefono: datos.telefono,
+            motivo: `${motivoFinal} (Fecha sugerida: ${datos.fecha})`
+        };
+
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/external-appointment`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(solicitudParaEnviar)
+            });
+
+            if (response.ok) {
+                alert("¡Solicitud enviada con éxito! El médico contactará contigo.");               
+                setDatos({ nombre: "", dni: "", telefono: "", fecha: "", motivo: "", otroMotivo: "" });
+            } else {
+                const errorData = await response.json();
+                alert("Error: " + (errorData.msg || "No se pudo enviar la solicitud"));
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error de conexión con el servidor.");
+        }
     };
 
     return (
@@ -24,26 +48,33 @@ export const CitaRapida = () => {
                 
                 <div className="mb-3">
                     <label className="form-label fw-bold">Nombre Completo</label>
-                    <input type="text" className="form-control" required 
+                    <input type="text" className="form-control" value={datos.nombre} required 
                         onChange={(e) => setDatos({...datos, nombre: e.target.value})} />
                 </div>
 
                 <div className="mb-3">
+                    <label className="form-label fw-bold">DNI / NIE</label>
+                    <input type="text" className="form-control" value={datos.dni} required 
+                        placeholder="12345678Z"
+                        onChange={(e) => setDatos({...datos, dni: e.target.value.toUpperCase()})} />
+                </div>
+
+                <div className="mb-3">
                     <label className="form-label fw-bold">Teléfono</label>
-                    <input type="tel" className="form-control" required 
-                        onChange={(e) => setDatos({...datos, telefono: e.target.value})} />
+                    <input type="tel" className="form-control" required
+                        onChange={(e) => setDatos({ ...datos, telefono: e.target.value })} />
                 </div>
 
                 <div className="mb-3">
                     <label className="form-label fw-bold">Fecha</label>
-                    <input type="date" className="form-control" required 
-                        onChange={(e) => setDatos({...datos, fecha: e.target.value})} />
+                    <input type="date" className="form-control" required
+                        onChange={(e) => setDatos({ ...datos, fecha: e.target.value })} />
                 </div>
 
                 <div className="mb-3">
                     <label className="form-label fw-bold">Motivo de la Consulta</label>
-                    <select className="form-select" required 
-                        onChange={(e) => setDatos({...datos, motivo: e.target.value})}>
+                    <select className="form-select" required
+                        onChange={(e) => setDatos({ ...datos, motivo: e.target.value })}>
                         <option value="">Selecciona una opción...</option>
                         <option value="Revision">Revisión General</option>
                         <option value="Urgencia">Urgencia</option>
@@ -51,21 +82,21 @@ export const CitaRapida = () => {
                         <option value="Otro">Otro (Especificar)</option>
                     </select>
                 </div>
-               
+
                 {datos.motivo === "Otro" && (
                     <div className="mb-3 animate__animated animate__fadeIn">
                         <label className="form-label fw-bold text-muted">Especifique el motivo</label>
-                        <textarea 
-                            className="form-control" 
-                            rows="2" 
+                        <textarea
+                            className="form-control"
+                            rows="2"
                             placeholder="Describa brevemente..."
                             required={datos.motivo === "Otro"}
-                            onChange={(e) => setDatos({...datos, otroMotivo: e.target.value})}
+                            onChange={(e) => setDatos({ ...datos, otroMotivo: e.target.value })}
                         ></textarea>
                     </div>
                 )}
 
-                <button type="submit" className="btn w-100 mt-3" 
+                <button type="submit" className="btn w-100 mt-3"
                     style={{ backgroundColor: "#8ea69b", color: "white", fontWeight: "bold" }}>
                     Confirmar Solicitud
                 </button>
