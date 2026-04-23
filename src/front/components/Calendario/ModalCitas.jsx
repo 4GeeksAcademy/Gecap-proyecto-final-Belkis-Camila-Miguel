@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function ModalCitas({ paciente, onClose, onMarcarAsistencia }) {
+function ModalCitas({ paciente, onClose}) {
     const [descargarDoc, setDescargarDoc] = useState(false);
     const [descargarJustificante, setDescargarJustificante] = useState(false)
 
@@ -93,13 +93,12 @@ function ModalCitas({ paciente, onClose, onMarcarAsistencia }) {
                         <div className="modal-footer d-flex justify-content-center gap-2 text-light">
                             <button type="button"
                                 className="btn shadow-sm text-light"
-                                style={{ backgroundColor: "#5e888c" }} > Asistio
+                                style={{ backgroundColor: "#5e888c" }}> Asistio
                             </button>
                             <button
                                 type="button"
                                 className="btn shadow-sm text-light"
-                                style={{ backgroundColor: "#5e888c" }}
-                                  > No Asistió
+                                style={{ backgroundColor: "#5e888c" }}> No Asistió
                             </button>
                             <button type="button"
                                 className="btn shadow-sm text-light"

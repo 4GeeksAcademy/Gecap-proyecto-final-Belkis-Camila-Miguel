@@ -229,7 +229,7 @@ def add_appointment():
         date=data["date"],
         start=data["start"],
         end=data["end"],
-        status="Active",
+        status="Pendiente",
         reason=data["reason"],
         user_id= 1
     )
