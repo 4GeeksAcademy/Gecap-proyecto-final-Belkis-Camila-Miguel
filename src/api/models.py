@@ -143,7 +143,7 @@ class Message(db.Model):
     __tablename__ = "message"
     id: Mapped[int] = mapped_column(primary_key=True)
     full_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    dni: Mapped[str] = mapped_column(String(20), nullable=False) # <--- REVISA ESTA LÍNEA
+    dni: Mapped[str] = mapped_column(String(20), nullable=False) 
     phone: Mapped[str] = mapped_column(String(20), nullable=False)
     reason: Mapped[str] = mapped_column(String(200), nullable=True)
     status: Mapped[str] = mapped_column(String(50), default="pendiente")

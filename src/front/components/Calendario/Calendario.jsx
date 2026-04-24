@@ -68,6 +68,20 @@ function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCi
         cargarMensajes();
     }, []);
 
+    const handleAgregarCitaLocal = (nuevaCita) => {        
+        setCitas(prevCitas => [...prevCitas, nuevaCita]);
+        
+        if (onAgregarCita) onAgregarCita(nuevaCita);
+    };
+    
+    const handleEliminarCitaLocal = async (idCita) => {        
+        if (onEliminarCita) {
+            await onEliminarCita(idCita);
+        }
+        
+        setCitas(prevCitas => prevCitas.filter(cita => (cita.id || cita.appointment_id) !== idCita));
+    };
+
     return (
         <div className="mt-2">
             <div className="d-flex gap-3 align-items-start">
@@ -83,8 +97,8 @@ function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCi
 
                     <CitasPorDia
                         fechaSeleccionada={startDate}
-                        onAgregarCita={onAgregarCita}
-                        onEliminarCita={onEliminarCita}
+                        onAgregarCita={handleAgregarCitaLocal} 
+                        onEliminarCita={handleEliminarCitaLocal} 
                         pacientesHoy={citas}
                         onActualizarCita={onActualizarCita}
                         abrirModalForzado={solicitarNuevaCita}

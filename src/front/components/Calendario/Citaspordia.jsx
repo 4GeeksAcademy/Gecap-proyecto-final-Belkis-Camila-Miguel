@@ -98,47 +98,51 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
         }
     };
 
-    const handleGuardarCita = async () => {
-        if (!selectedRange || !selectedRange.start) {
-            alert("Por favor, selecciona un horario.");
-            return;
-        }
+  const handleGuardarCita = async () => {
+    if (!selectedRange || !selectedRange.start) {
+        alert("Por favor, selecciona un horario.");
+        return;
+    }
 
-        const motivoFinal = formData.motivo === "Otro" ? formData.otroMotivo : formData.motivo;
-        const citaParaEnviar = {
-            patient_id: formData.patient_id,
-            message_id: formData.message_id,
-            nombre: formData.nombre,
-            telefono: formData.telefono,
-            fecha: formData.fecha || selectedRange.start.toString("yyyy-MM-dd"),
-            hora: formData.hora || selectedRange.start.toString("HH:mm"),
-            motivo: motivoFinal,
-            start: selectedRange.start.toString(),
-            end: selectedRange.end ? selectedRange.end.toString() : selectedRange.start.addMinutes(30).toString()
-        };
+    const motivoFinal = formData.motivo === "Otro" ? formData.otroMotivo : formData.motivo;
+    const citaParaEnviar = {
+        patient_id: formData.patient_id,
+        message_id: formData.message_id,
+        nombre: formData.nombre,
+        telefono: formData.telefono,
+        fecha: formData.fecha || selectedRange.start.toString("yyyy-MM-dd"),
+        hora: formData.hora || selectedRange.start.toString("HH:mm"),
+        motivo: motivoFinal,
+        start: selectedRange.start.toString(),
+        end: selectedRange.end ? selectedRange.end.toString() : selectedRange.start.addMinutes(30).toString()
+    };
 
-        try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`
-                },
-                body: JSON.stringify(citaParaEnviar)
+    try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
+            },
+            body: JSON.stringify(citaParaEnviar)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (onAgregarCita) onAgregarCita(data.appointment || data);
+                      
+            setShowModal(false);
+            setFormData({
+                nombre: "", telefono: "", motivo: "", otroMotivo: "",
+                hora: "10:00", patient_id: null, message_id: null
             });
-
-            if (response.ok) {
-                const data = await response.json();
-                if (onAgregarCita) onAgregarCita(data);
-                setShowModal(false);
-                if (calendar) calendar.clearSelection();
-                alert("Cita guardada correctamente");
-            } else {
-                alert("Error al guardar en el servidor");
-            }
-        } catch (error) {
-            console.error("Error:", error);
+            if (calendar) calendar.clearSelection();
+            
+            alert("Cita guardada correctamente");
         }
+    } catch (error) {
+        console.error("Error:", error);
+    }
     };
 
     const config = {
