@@ -8,13 +8,12 @@ export const Sidebar = () => {
     const { store, dispatch } = useGlobalReducer();
     console.log("Rol detectado en Sidebar:", store.role);
 
-    const medicoItems = ["Área personal", "Estadisticas", "Agenda Médica", "Alta de Paciente", "Ficha de Paciente"];
-    const pacienteItems = ["Agenda Médica"];
+    const medicoItems = ["Área personal", "Estadisticas", "Alta de Paciente", "Ficha de Paciente"];
+    
 
     const menuItems = [
         { name: "Área personal", path: "/areapersonal", icon: "fas fa-notes-medical" },
         { name: "Estadisticas", path: "/estadisticas", icon: "fas fa-chart-line" },
-        { name: "Agenda Médica", path: "/agenda", icon: "fas fa-calendar-alt" },
         { name: "Listado de Pacientes", path: "/pacientes", icon: "fas fa-users" }, // Dejamos este como principal
     ];
 
@@ -42,8 +41,7 @@ export const Sidebar = () => {
                     style={{ width: "100px", height: "auto", objectFit: "contain" }}
                 />
             </div>
-
-            {/* INFO DEL USUARIO LOGUEADO */}
+            
             <div className="text-center my-3">
                 <p className="mb-0 small opacity-75 text-uppercase fw-bold" style={{ fontSize: "0.6rem" }}>
                     {currentRole === "medico" ? "Facultativo" : "Paciente"}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { DayPilot, DayPilotCalendar } from "@daypilot/daypilot-lite-react";
+import ModalCitas from "./ModalCitas";
 
 
 const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacientesHoy, onActualizarCita, abrirModalBoton, setAbrirModalBoton }) => {
@@ -7,6 +8,10 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
     const [calendar, setCalendar] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [selectedRange, setSelectedRange] = useState({ start: null, end: null });
+    const [mostratModal, setMostrarModal] = useState(false);
+    const [seleccionarCita, setSeleccionarCita] = useState(null);
+
+
 
     const [formData, setFormData] = useState({
         nombre: "",
@@ -16,7 +21,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
         otroMotivo: "",
         horaCita: "10:00"
     });
-    
+
     useEffect(() => {
         if (!calendar || calendar.disposed()) return;
 
@@ -172,19 +177,30 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
     };
 
     const config = {
-        viewType: "Day",
+        viewType: seleccionarVista,
         headerDateFormat: "dd/MM/yyyy",
-        columns: [{ name: "Agenda Médica", id: "C1" }],
+        columns: seleccionarVista === "Day" ? [{ name: "Agenda Médica", id: "C1" }] : undefined,
+        cellDuration: 10,
         dayBeginsHour: 10,
         dayEndsHour: 21,
         businessBeginsHour: 10,
         businessEndsHour: 21,
+        showCurrentTimeLine: true,
+        currentTimeLineColor: "red",
         heightSpec: "BusinessHoursNoScroll",
         headerHeight: 50,
         cellHeight: 40,
         theme: "calendar_default",
         durationBarVisible: false,
         timeRangeSelectedHandling: "Enabled",
+
+
+        onEventClick: async (args) => {
+            const e = args.e;
+            const datosPaciente = pacientesHoy.find(p => p.id === e.id());
+            setSeleccionarCita(datosPaciente);
+            setMostrarModal(true);
+        },
 
         onTimeRangeSelected: async (args) => {
 
@@ -213,7 +229,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
         },
 
         onBeforeEventRender: args => {
-             if (!args.data.backColor) {
+            if (!args.data.backColor) {
                 args.data.backColor = "#93c47d";
             }
 
@@ -228,6 +244,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                     text: "X",
                     style: "cursor:pointer; background-color: rgba(0,0,0,0.2); border-radius: 50%; text-align: center; line-height: 18px;",
                     onClick: (argsArea) => {
+                        argsArea.originalEvent.stopPropagation();
                         onEliminarCita(argsArea.source.id());
                     }
                 },
@@ -239,6 +256,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                     text: "✎",
                     style: "cursor:pointer; background-color: rgba(0,0,0,0.2); border-radius: 50%; text-align: center; line-height: 18px;",
                     onClick: async (argsArea) => {
+                        argsArea.originalEvent.stopPropagation();
                         const citaActual = argsArea.source.data;
 
                         const nombreActual = citaActual.text?.split(" - ")[0] || "";
@@ -256,7 +274,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                             reason: modalMotivo.result,
                             start: citaActual.start.toString(),
                             end: citaActual.end.toString(),
-                            status: "Active",
+                            status: "pendiente",
                             date: new Date(citaActual.start).toLocaleTimeString([], {
                                 hour: '2-digit',
                                 minute: '2-digit'
@@ -270,31 +288,28 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
 
 
 
-return (
-    <div className="mt-3 border rounded shadow-sm overflow-hidden">
-        <DayPilotCalendar {...config} controlRef={setCalendar} />
+    return (
+        <div className="mt-3 border rounded shadow-sm overflow-hidden">
+            <DayPilotCalendar {...config} controlRef={setCalendar} />
+            {mostratModal && (
+                <ModalCitas
+                    paciente={seleccionarCita}
+                    onClose={() => setMostrarModal(false)}
+                />
+            )}
 
-        {showModal && (
-            <div style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                background: "rgba(0,0,0,0.5)",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                zIndex: 9999
-            }}>
+            {showModal && (
                 <div style={{
-                    background: "white",
-                    padding: "20px",
-                    borderRadius: "10px",
-                    minWidth: "320px",
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    background: "rgba(0,0,0,0.5)",
                     display: "flex",
-                    flexDirection: "column",
-                    gap: "10px"
+                    justifyContent: "center",
+                    alignItems: "center",
+                    zIndex: 9999
                 }}>
                     <h3>Nueva cita</h3>
 
@@ -354,13 +369,12 @@ return (
                     {formData.motivo === "Otro" && (
                         <input
                             type="text"
-                            placeholder="Escribe el motivo"
-                            value={formData.otroMotivo}
+                            placeholder="Nombre"
+                            value={formData.nombre}
                             onChange={(e) =>
-                                setFormData({ ...formData, otroMotivo: e.target.value })
+                                setFormData({ ...formData, nombre: e.target.value })
                             }
                         />
-                    )}
 
                     <div style={{
                         display: "flex",
@@ -380,14 +394,24 @@ return (
                                 horaCita: "10:00"
                             });
                         }}>
-                            Cancelar
-                        </button>
+                            <button onClick={handleGuardarCita}>Guardar</button>
+                            <button onClick={() => {
+                                setShowModal(false);
+                                setFormData({
+                                    nombre: "",
+                                    telefono: "",
+                                    motivo: "",
+                                    otroMotivo: ""
+                                });
+                            }}>
+                                Cancelar
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        )}
-    </div>
-);
+            )}
+        </div>
+    );
 
 
 };

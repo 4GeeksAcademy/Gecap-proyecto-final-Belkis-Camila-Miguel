@@ -6,9 +6,7 @@ import DoctorScheduleBar from "./DoctorScheduleBar/DoctorScheduleBar";
 function AreaPersonal() {
     const [pacientesHoy, setPacientesHoy] = useState([]);
     const profesional = { nombre: "Juan Pérez" };
-    //pacientes hoy son los pacientes del dia
-    ///actualiza la lista de pacientes , con el use efect una vez al cargar la pagina, haciendo get =>
-    //como aqui se traen los datos (GEt) aqui haremos el post tambien
+    
     useEffect(() => {
         fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointments`, {
             method: "GET",
@@ -44,7 +42,7 @@ function AreaPersonal() {
                     start: nuevoPaciente.start,
                     end: nuevoPaciente.end,
                     status: nuevoPaciente.status,
-                    reason: nuevoPaciente.reason || "Consulta"  //=> esto se debe modifica Cami, para hacer los de escoger la razon del bloqueo en la agenda
+                    reason: nuevoPaciente.reason || "Consulta" 
                 })
             });
 
