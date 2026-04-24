@@ -1,14 +1,14 @@
 import React from 'react';
 import Calendario from "./Calendario/Calendario";
 import { useState, useEffect } from 'react';
+import useStore from "../hooks/useGlobalReducer";
 import DoctorScheduleBar from "./DoctorScheduleBar/DoctorScheduleBar";
 
 function AreaPersonal() {
     const [pacientesHoy, setPacientesHoy] = useState([]);
-    const profesional = { nombre: "Juan Pérez" };
-    //pacientes hoy son los pacientes del dia
-    ///actualiza la lista de pacientes , con el use efect una vez al cargar la pagina, haciendo get =>
-    //como aqui se traen los datos (GEt) aqui haremos el post tambien
+    const { store } = useStore();
+    const nombreDoctor = store.user?.user_name || "Profesional";
+
     useEffect(() => {
         fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointments`, {
             method: "GET",
@@ -22,14 +22,13 @@ function AreaPersonal() {
                 return response.json();
             })
             .then((data) => {
-                console.log("Citas cargadas:", data);
+                console.log("Citas recibidas del servidor:", data);
                 setPacientesHoy(data);
             })
             .catch((error) => console.log("Error:", error));
     }, []);
 
-
-    const addAppointmentDataBase = async (nuevoPaciente) => {
+    const addAppointmentDataBase = async (nuevaCitaData) => {
         try {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment`, {
                 method: "POST",
@@ -37,31 +36,27 @@ function AreaPersonal() {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
                 },
-                body: JSON.stringify({
-                    patient_id: nuevoPaciente.id,
-                    nombre: nuevoPaciente.nombre,
-                    date: nuevoPaciente.date,
-                    start: nuevoPaciente.start,
-                    end: nuevoPaciente.end,
-                    status: nuevoPaciente.status,
-                    reason: nuevoPaciente.reason || "Consulta"  //=> esto se debe modifica Cami, para hacer los de escoger la razon del bloqueo en la agenda
-                })
+
+                body: JSON.stringify(nuevaCitaData)
             });
 
             if (response.ok) {
                 const data = await response.json();
-                setPacientesHoy(prev => [...prev, data.appointment]);
-            } else {
-                console.log("Error al guardar en el servidor");
+
+                const citaCreada = data.appointment || data;
+
+                setPacientesHoy(prev => [...prev, citaCreada]);
+                return true;
             }
         } catch (error) {
-            console.log("Error de red:", error);
+            console.error("Error al guardar:", error);
         }
+        return false;
     };
 
     const eliminarPaciente = async (id) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment/api/appointment/${id}`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
@@ -70,8 +65,6 @@ function AreaPersonal() {
 
             if (response.ok) {
                 setPacientesHoy(prev => prev.filter(p => p.id !== id));
-            } else {
-                alert("No se pudo eliminar la cita en el servidor");
             }
         } catch (error) {
             console.log("Error al eliminar:", error);
@@ -116,8 +109,6 @@ function AreaPersonal() {
     const proximaCita = proximasCitas[0] || null;
 
     return (
-
-
         <div className="container-fluid" style={{ minHeight: "100vh" }}>
             <div className="card border-0 shadow-sm" style={{ borderRadius: "15px", overflow: "hidden" }}>
                 <div style={{ height: "6px", backgroundColor: "#93bbbf" }}></div>
@@ -140,15 +131,18 @@ function AreaPersonal() {
 
                         <div className="text-end">
                             <p className="text-muted mb-0" style={{ fontSize: "1.3rem" }}>
-                                Bienvenido, <span className="fw-bold" style={{ color: "#4a5568" }}>{profesional.nombre}!</span>
+                                Bienvenido, <span className="fw-bold" style={{ color: "#4a5568" }}>
+                                   
+                                    {nombreDoctor}!
+                                </span>
                             </p>
                         </div>
                     </div>
 
                     <div className="px-1">
                         <DoctorScheduleBar
-                            appointments={citasNormalizadas}
-                            proximaCita={proximaCita}
+                            appointments={pacientesHoy}
+                            proximaCita={pacientesHoy[0]}
                         />
                     </div>
                 </div>

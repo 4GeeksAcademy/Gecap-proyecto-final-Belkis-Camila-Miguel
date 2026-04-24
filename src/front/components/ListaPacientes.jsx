@@ -46,10 +46,33 @@ export const ListaPacientes = () => {
         p.apellidos?.toLowerCase().includes(busqueda.toLowerCase())
     ) || [];
 
+    const handleEliminarPaciente = async (e, id, nombre) => {
+        e.stopPropagation();
+
+        if (!window.confirm(`¿Estás seguro de que deseas eliminar a ${nombre}?`)) return;
+
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/pacientes/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            });
+
+            if (response.ok) {
+                dispatch({ type: "delete_patient", payload: id });
+            } else {
+                alert("No se pudo eliminar el paciente.");
+            }
+        } catch (error) {
+            console.error("Error al eliminar:", error);
+        }
+    };
+
     return (
         <div className="container-fluid px-2 px-md-4 py-4 animate__animated animate__fadeIn">
             <div className="card shadow-sm border-0 rounded-4 overflow-hidden">
-                
+
                 <div className="bg-white p-3 p-md-4 border-bottom">
                     <div className="row g-3 align-items-center">
                         <div className="col-12 col-lg-4 text-center text-lg-start">
@@ -70,8 +93,8 @@ export const ListaPacientes = () => {
                                         onChange={(e) => setBusqueda(e.target.value)}
                                     />
                                 </div>
-                                <button 
-                                    className="btn fw-bold shadow-sm text-nowrap px-4" 
+                                <button
+                                    className="btn fw-bold shadow-sm text-nowrap px-4"
                                     style={{ backgroundColor: "#e8888c", color: "white", borderRadius: "12px", height: "45px", border: "none", minWidth: "fit-content" }}
                                     onClick={handleNuevoPaciente}
                                 >
@@ -116,16 +139,17 @@ export const ListaPacientes = () => {
                                                     {p.embarazo !== "SI" && p.alergia_penicilina !== "SI" && <span className="badge bg-success opacity-50 rounded-pill fw-normal">Sano</span>}
                                                 </div>
                                             </td>
-                                            <td className="text-end pe-4">                                              
+                                            <td className="text-end pe-4">
                                                 <div className="d-flex justify-content-end align-items-center gap-2" style={{ minWidth: "120px" }}>
                                                     <button className="btn btn-sm btn-outline-primary rounded-pill px-3 border-2 fw-bold" style={{ color: "#566873", borderColor: "#b4d2d9" }}>
                                                         Ver <span className="d-none d-md-inline">Ficha</span>
                                                     </button>
-                                                    <button 
-                                                        className="btn btn-sm text-danger border-0" 
-                                                        onClick={(e) => { e.stopPropagation(); }}
+                                                    <button
+                                                        className="btn btn-sm text-danger border-0 p-2"
+                                                        onClick={(e) => handleEliminarPaciente(e, p.id, p.nombre)}
+                                                        title="Eliminar paciente"
                                                     >
-                                                        <i className="fas fa-trash-alt"></i>
+                                                        <i className="fas fa-trash-alt" style={{ fontSize: "1.1rem" }}></i>
                                                     </button>
                                                 </div>
                                             </td>

@@ -35,7 +35,10 @@ class Patient(db.Model):
     email: Mapped[str] = mapped_column(String(120), nullable=True)
     telefono: Mapped[str] = mapped_column(String(20), nullable=True)
     nacimiento: Mapped[str] = mapped_column(String(20), nullable=True)
-    appointments: Mapped[List["Appointment"]] = relationship(back_populates="patient")
+    appointments: Mapped[List["Appointment"]] = relationship(
+        back_populates="patient", 
+        cascade="all, delete-orphan" 
+    )
 
     # Biometría y Constantes
     peso: Mapped[float] = mapped_column(Float, nullable=True)
@@ -61,7 +64,6 @@ class Patient(db.Model):
     alergia_aines: Mapped[str] = mapped_column(String(5), default="NO", nullable=True)
     alergia_otros: Mapped[str] = mapped_column(Text, nullable=True)
     anotaciones: Mapped[str] = mapped_column(Text, nullable=True)
-
    
     def serialize(self):
         return {
@@ -118,7 +120,8 @@ class Appointment(db.Model):
             "start": self.start,
             "end": self.end,
             "status": self.status,
-            "reason": self.reason
+            "reason": self.reason,
+            "text": f"{self.patient.nombre} - {self.reason}"
         }
     
 class Message(db.Model):

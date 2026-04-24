@@ -8,34 +8,65 @@ import "../Calendario/Calendario.css";
 function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCita }) {
     const [startDate, setStartDate] = useState(new Date());
     const [mensajesWeb, setMensajesWeb] = useState([]);
-    
+    const [solicitarNuevaCita, setSolicitarNuevaCita] = useState(false);
+    const [citas, setCitas] = useState([]);
+
     const cargarMensajes = async () => {
-         const token = localStorage.getItem("token"); 
+        const token = localStorage.getItem("token");
 
-    if (!token || token === "null") {
-        console.warn("Token no encontrado o inválido");
-        return;
-    }
-
-    try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/messages`, {
-            method: "GET",
-            headers: { 
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            setMensajesWeb(data);
-        } else if (response.status === 422) {
-            console.error("Error 422: El servidor rechaza el formato del token");
+        if (!token || token === "null") {
+            console.warn("Token no encontrado o inválido");
+            return;
         }
-    } catch (error) {
-        console.error("Error en la petición:", error);
-    }
-};
+
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/messages`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setMensajesWeb(data);
+            } else if (response.status === 422) {
+                console.error("Error 422: El servidor rechaza el formato del token");
+            }
+        } catch (error) {
+            console.error("Error en la petición:", error);
+        }
+
+    };
+
+    useEffect(() => {
+        cargarMensajes();
+    }, []);
+
+    const cargarCitasServidor = async () => {
+        const token = localStorage.getItem("token");
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointments`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setCitas(data);
+            }
+        } catch (error) {
+            console.error("Error cargando citas:", error);
+        }
+    };
+
+    useEffect(() => {
+        cargarCitasServidor();
+        cargarMensajes();
+    }, []);
 
     return (
         <div className="mt-2">
@@ -54,23 +85,27 @@ function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCi
                         fechaSeleccionada={startDate}
                         onAgregarCita={onAgregarCita}
                         onEliminarCita={onEliminarCita}
-                        pacientesHoy={pacienteHoy}
+                        pacientesHoy={citas}
                         onActualizarCita={onActualizarCita}
+                        abrirModalForzado={solicitarNuevaCita}
+                        onModalAbierto={() => setSolicitarNuevaCita(false)}
                     />
                 </div>
 
                 <div className='contenedor-calendario shadow-sm bg-white p-2 rounded'>
                     <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} inline locale={es} />
-                    
-                    <button className="btn fw-bold shadow-sm w-100 mb-2" style={{ backgroundColor: "#93bbbf", color: "white", letterSpacing: "0.7px" }}>
+
+                    <button
+                        className="btn fw-bold shadow-sm w-100 mb-2 text-white"
+                        style={{ backgroundColor: "#93bbbf" }}
+                        onClick={() => setSolicitarNuevaCita(true)}
+                    >
                         + Nueva cita
                     </button>
-
-                    {/* BOTÓN SOLICITADO */}
-                    <button 
-                        className="btn fw-bold shadow-sm w-100 position-relative" 
+                    <button
+                        className="btn fw-bold shadow-sm w-100 position-relative"
                         style={{ backgroundColor: "#566873", color: "white", letterSpacing: "0.7px" }}
-                        data-bs-toggle="modal" 
+                        data-bs-toggle="modal"
                         data-bs-target="#modalMensajesWeb"
                         onClick={cargarMensajes}
                     >

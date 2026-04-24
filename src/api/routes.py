@@ -5,6 +5,8 @@ from flask_cors import CORS
 from sqlalchemy import select
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from flask_bcrypt import Bcrypt
+import time
+from datetime import datetime
 
 
 bcrypt = Bcrypt()
@@ -26,8 +28,7 @@ def signup():
 
     pw_hash = bcrypt.generate_password_hash(password).decode('utf-8')
 
-    try:
-        
+    try:        
         new_user = User(
             email=email, 
             password=pw_hash,
@@ -49,8 +50,7 @@ def signup():
         
         db.session.commit()
 
-        token = create_access_token(identity=str(new_user.id), additional_claims={"role": role})
-        
+        token = create_access_token(identity=str(new_user.id), additional_claims={"role": role})        
         user_data = new_user.serialize() if role == "medico" else new_profile.serialize()
 
         return jsonify({
@@ -88,7 +88,6 @@ def login():
         }), 200
 
     return jsonify({"msg": "Email o contraseña incorrectos"}), 401
-
 
 @api.route('/perfil', methods=['GET'])
 @jwt_required()
@@ -206,7 +205,6 @@ def get_all_appointment():
         select(Appointment)).scalars().all()
     return jsonify([appointment.serialize() for appointment in result_all_appointment]), 200
 
-
 @api.route('/appointment/<int:appointment_id>', methods=['GET'])
 def get_appointment(appointment_id):
     appointment = db.session.get(Appointment, appointment_id)
@@ -214,35 +212,47 @@ def get_appointment(appointment_id):
         return jsonify({"msg": "Cita no encontrada"}), 404
     return jsonify(appointment.serialize()), 200
 
-
 @api.route('/appointment', methods=['POST'])
-def add_appointment():
-    data = request.get_json()
-    patient = db.session.execute(select(Patient).where(Patient.nombre == "prueba")).scalar_one_or_none()
+@jwt_required()
+def create_appointment():
+    data = request.json
+    current_user_id = get_jwt_identity()
+    
+    patient_id = data.get("patient_id")
+    nombre = data.get("nombre")
+    dni = data.get("dni") 
 
-    if not patient:
-        patient = Patient(nombre=data["nombre"])
-        db.session.add(patient)
+    if not patient_id and nombre:        
+        existente = Patient.query.filter_by(nombre=nombre).first()
+        
+        if existente:
+            patient_id = existente.patient_id
+
+        else:          
+            nuevo_paciente = Patient(
+                nombre=nombre,
+                telefono=data.get("telefono"),
+                dni=dni
+            )
+            db.session.add(nuevo_paciente)
+            db.session.commit()
+            patient_id = nuevo_paciente.patient_id
+    
+    try:
+        nueva_cita = Appointment(
+            patient_id=patient_id,
+            user_id=current_user_id,
+            date=data.get("fecha"),
+            start=data.get("hora"),
+            end=data.get("hora"),
+            reason=data.get("motivo")
+        )
+        db.session.add(nueva_cita)
         db.session.commit()
-
-    new_appointment = Appointment(
-        patient_id=patient.patient_id,
-        date=data["date"],
-        start=data["start"],
-        end=data["end"],
-        status="Active",
-        reason=data["reason"],
-        user_id= 1
-    )
-
-    db.session.add(new_appointment)
-    db.session.commit()
-
-    return jsonify({
-        "message": "Appointment created successfully",
-        "appointment": new_appointment.serialize()
-    }), 201
-
+        return jsonify(nueva_cita.serialize()), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": "Error de base de datos", "error": str(e)}), 400
 
 @api.route('/appointment/<int:appointment_id>', methods=['PUT'])
 def update_appointment(appointment_id):
@@ -264,7 +274,6 @@ def update_appointment(appointment_id):
     db.session.commit()
 
     return jsonify({"mensaje": f"Usuario {appointment_id} actualizado", "datos":appointment_actualizate.serialize()}), 200
-
 
 @api.route('/appointment/<int:appointment_id>', methods=['DELETE'])
 def delete_appointment(appointment_id):
