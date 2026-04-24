@@ -33,7 +33,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                 text: `${p.nombre || p.patient_name || "Paciente"} - ${p.motivo || p.reason || "Consulta"}`,
                 start: p.start,
                 end: p.end,
-                backColor: "#93c47d",
+                backColor: p.status === "pendiente" ? "#93c47d" : "#b9878c",
             })),
 
         });
@@ -82,7 +82,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
             }),
             reason: motivoFinal,
             patient_name: formData.nombre,
-            status: "Active",
+            status: "pendiente",
             date: new Date(selectedRange.start).toISOString()
         });
 
@@ -185,7 +185,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                             reason: modalMotivo.result,
                             start: citaActual.start.toString(),
                             end: citaActual.end.toString(),
-                            status: "Active",
+                            status: "pendiente",
                             date: new Date(citaActual.start).toLocaleTimeString([], {
                                 hour: '2-digit',
                                 minute: '2-digit'
