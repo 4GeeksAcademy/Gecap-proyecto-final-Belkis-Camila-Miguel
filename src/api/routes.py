@@ -219,15 +219,16 @@ def create_appointment():
     current_user_id = get_jwt_identity()
     
     patient_id = data.get("patient_id")
+    message_id = data.get("message_id") # <--- Capturamos el ID del mensaje web
     nombre = data.get("nombre")
     dni = data.get("dni") 
 
-    if not patient_id and nombre:        
+    # LÓGICA 1: Si NO viene de un mensaje web y NO tenemos patient_id, 
+    # buscamos o creamos un Paciente (Formulario Interno)
+    if not patient_id and not message_id and nombre:        
         existente = Patient.query.filter_by(nombre=nombre).first()
-        
         if existente:
             patient_id = existente.patient_id
-
         else:          
             nuevo_paciente = Patient(
                 nombre=nombre,
@@ -238,9 +239,11 @@ def create_appointment():
             db.session.commit()
             patient_id = nuevo_paciente.patient_id
     
+    # LÓGICA 2: Crear la cita vinculando al que corresponda
     try:
         nueva_cita = Appointment(
-            patient_id=patient_id,
+            patient_id=patient_id,  # Será None si viene de mensaje
+            message_id=message_id,  # Será None si es paciente registrado
             user_id=current_user_id,
             date=data.get("fecha"),
             start=data.get("hora"),

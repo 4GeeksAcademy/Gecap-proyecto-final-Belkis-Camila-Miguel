@@ -97,31 +97,46 @@ class Patient(db.Model):
 
 class Appointment(db.Model):
     __tablename__ = "appointment"
-    appointment_id: Mapped[int] = mapped_column(primary_key=True)
+    appointment_id: Mapped[int] = mapped_column(primary_key=True)       
     patient_id: Mapped[int] = mapped_column(
-        ForeignKey("patient.patient_id"), nullable=False)
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("user.id"), nullable=False)
+        ForeignKey("patient.patient_id"), nullable=True)     
+    
+    message_id: Mapped[int] = mapped_column(
+        ForeignKey("message.id"), nullable=True)
+
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     date: Mapped[str] = mapped_column(String(50), nullable=False)
     start: Mapped[str] = mapped_column(String(50), nullable=False)
     end: Mapped[str] = mapped_column(String(50), nullable=False)
     reason: Mapped[str] = mapped_column(String(200), nullable=True)
     status: Mapped[str] = mapped_column(String(50), default="pendiente")
+    
     user: Mapped["User"] = relationship(back_populates="appointments")
-    patient: Mapped["Patient"] = relationship(back_populates="appointments")
+    patient: Mapped["Patient"] = relationship(back_populates="appointments")    
+    message: Mapped["Message"] = relationship()
 
-    def serialize(self):
+    def serialize(self):       
+        nombre_display = "Desconocido"
+                
+        if self.patient:            
+            nombre_display = f"{self.patient.nombre} {self.patient.apellidos or ''}".strip()
+        elif self.message:
+            nombre_display = self.message.full_name
+        
+        motivo = self.reason if self.reason else "Sin motivo"
+
         return {
             "id": self.appointment_id,
             "patient_id": self.patient_id,
-            "patient_name": f"{self.patient.nombre} {self.patient.apellidos}" if self.patient else "Desconocido",
+            "message_id": self.message_id,
+            "patient_name": nombre_display,
             "user_id": self.user_id,
             "date": self.date,
             "start": self.start,
             "end": self.end,
             "status": self.status,
-            "reason": self.reason,
-            "text": f"{self.patient.nombre} - {self.reason}"
+            "reason": motivo,
+            "text": f"{nombre_display} - {motivo}"
         }
     
 class Message(db.Model):

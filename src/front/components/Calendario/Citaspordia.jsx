@@ -62,17 +62,29 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
 
     useEffect(() => {
         if (abrirModalForzado) {
+
+            const inicioDefecto = new DayPilot.Date(fechaSeleccionada).addHours(10);
+
+            setSelectedRange({
+                start: inicioDefecto,
+                end: inicioDefecto.addMinutes(30)
+            });
+
             setFormData({
                 nombre: "",
                 telefono: "",
                 motivo: "",
                 otroMotivo: "",
-                hora: "10:00"
+                hora: "10:00",
+                patient_id: null,
+                message_id: null
             });
+
             setShowModal(true);
-            onModalAbierto();
+
+            if (onModalAbierto) onModalAbierto();
         }
-    }, [abrirModalForzado]);
+    }, [abrirModalForzado, fechaSeleccionada]);
 
     const manejarBusqueda = (texto) => {
         setFormData({ ...formData, nombre: texto });
@@ -87,17 +99,22 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
     };
 
     const handleGuardarCita = async () => {
-        const motivoFinal = formData.motivo === "Otro" ? formData.otroMotivo : formData.motivo;
+        if (!selectedRange || !selectedRange.start) {
+            alert("Por favor, selecciona un horario.");
+            return;
+        }
 
+        const motivoFinal = formData.motivo === "Otro" ? formData.otroMotivo : formData.motivo;
         const citaParaEnviar = {
             patient_id: formData.patient_id,
+            message_id: formData.message_id,
             nombre: formData.nombre,
             telefono: formData.telefono,
-            fecha: formData.fecha,
-            hora: formData.hora,
+            fecha: formData.fecha || selectedRange.start.toString("yyyy-MM-dd"),
+            hora: formData.hora || selectedRange.start.toString("HH:mm"),
             motivo: motivoFinal,
             start: selectedRange.start.toString(),
-            end: selectedRange.end.toString()
+            end: selectedRange.end ? selectedRange.end.toString() : selectedRange.start.addMinutes(30).toString()
         };
 
         try {
@@ -112,142 +129,35 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
 
             if (response.ok) {
                 const data = await response.json();
-
-                if (onAgregarCita) {
-                    onAgregarCita(data.appointment || data);
-                }
-
+                if (onAgregarCita) onAgregarCita(data);
                 setShowModal(false);
-                alert("Cita guardada permanentemente en la base de datos");
+                if (calendar) calendar.clearSelection();
+                alert("Cita guardada correctamente");
             } else {
-                const errorLog = await response.json();
-                console.error("Error del servidor:", errorLog);
-                alert("El servidor rechazó la cita. Revisa la consola del backend.");
+                alert("Error al guardar en el servidor");
             }
         } catch (error) {
-            console.error("Error de conexión:", error);
-        }
-
-        const nuevaCita = {
-            id: DayPilot.guid(),
-            text: `${formData.nombre} - ${motivoFinal}`,
-            start: selectedRange.start,
-            end: selectedRange.end,
-            backColor: "#93c47d",
-        };
-
-        onAgregarCita({
-            id: nuevaCita.id,
-            nombre: formData.nombre,
-            motivo: motivoFinal,
-            telefono: formData.telefono,
-            start: selectedRange.start,
-            end: selectedRange.end,
-            hora: new Date(selectedRange.start).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit"
-            }),
-            reason: motivoFinal,
-            patient_name: formData.nombre,
-            status: "Active",
-            date: new Date(selectedRange.start).toISOString()
-        });
-
-        setShowModal(false);
-
-        setFormData({
-            nombre: "",
-            telefono: "",
-            motivo: "",
-            otroMotivo: ""
-        });
-
-        if (calendar) {
-            calendar.clearSelection();
+            console.error("Error:", error);
         }
     };
 
     const config = {
         viewType: "Day",
-        headerDateFormat: "dd/MM/yyyy",
-        columns: [{ name: "Agenda Médica", id: "C1" }],
-        dayBeginsHour: 10,
-        dayEndsHour: 21,
-        businessBeginsHour: 10,
-        businessEndsHour: 21,
-        heightSpec: "BusinessHoursNoScroll",
-        headerHeight: 50,
-        cellHeight: 40,
-        theme: "calendar_default",
-        durationBarVisible: false,
-
-        onTimeRangeSelected: async (args) => {
-            setSelectedRange({
-                start: args.start,
-                end: args.end
-            });
-
+        onTimeRangeSelected: (args) => {
+            setSelectedRange({ start: args.start, end: args.end });
+            setFormData(prev => ({ 
+                ...prev, 
+                hora: args.start.toString("HH:mm"),
+                fecha: args.start.toString("yyyy-MM-dd")
+            }));
             setShowModal(true);
-
-            if (calendar) {
-                calendar.clearSelection();
-            }
-
         },
-
         onBeforeEventRender: args => {
-            if (!args.data.backColor) {
-                args.data.backColor = "#93c47d";
-            }
-
-            args.data.borderColor = "darker";
-            args.data.fontColor = "white";
-            args.data.areas = [
-                {
-                    right: 5,
-                    top: 8,
-                    width: 18,
-                    height: 18,
-                    text: "X",
-                    style: "cursor:pointer; background-color: rgba(0,0,0,0.2); border-radius: 50%; text-align: center; line-height: 18px;",
-                    onClick: (argsArea) => {
-                        onEliminarCita(argsArea.source.id());
-                    }
-                },
-                {
-                    right: 28,
-                    top: 8,
-                    width: 18,
-                    height: 18,
-                    text: "✎",
-                    style: "cursor:pointer; background-color: rgba(0,0,0,0.2); border-radius: 50%; text-align: center; line-height: 18px;",
-                    onClick: async (argsArea) => {
-                        const citaActual = argsArea.source.data;
-
-                        const nombreActual = citaActual.text?.split(" - ")[0] || "";
-                        const motivoActual = citaActual.text?.split(" - ")[1] || "";
-
-                        const modalNombre = await DayPilot.Modal.prompt("Editar nombre:", nombreActual);
-                        if (modalNombre.canceled || !modalNombre.result) return;
-
-                        const modalMotivo = await DayPilot.Modal.prompt("Editar motivo:", motivoActual);
-                        if (modalMotivo.canceled || !modalMotivo.result) return;
-
-                        onActualizarCita(citaActual.id, {
-                            nombre: modalNombre.result,
-                            motivo: modalMotivo.result,
-                            reason: modalMotivo.result,
-                            start: citaActual.start.toString(),
-                            end: citaActual.end.toString(),
-                            status: "Active",
-                            date: new Date(citaActual.start).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            }),
-                        });
-                    }
-                }
-            ];
+            args.data.areas = [{
+                right: 5, top: 8, width: 18, height: 18, text: "X",
+                style: "cursor:pointer; background:rgba(0,0,0,0.2); border-radius:50%; color:white; text-align:center;",
+                onClick: (e) => onEliminarCita(e.source.id())
+            }];
         }
     };
 
@@ -301,15 +211,22 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                                     </option>
                                 ))}
                             </select>
-
-                            {/* Input para búsqueda o paciente nuevo */}
                             <input
                                 type="text"
                                 className="form-control bg-light border-0 py-2"
                                 style={{ borderRadius: "10px" }}
                                 placeholder="O escribe para buscar/nuevo..."
                                 value={formData.nombre || ""}
-                                onChange={(e) => manejarBusqueda(e.target.value)}
+                                onChange={(e) => {
+                                    const texto = e.target.value;
+                                    manejarBusqueda(texto);
+                                    setFormData({
+                                        ...formData,
+                                        nombre: texto,
+                                        patient_id: null,
+                                        message_id: null
+                                    });
+                                }}
                                 autoComplete="off"
                             />
 
