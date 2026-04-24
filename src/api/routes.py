@@ -230,7 +230,7 @@ def add_appointment():
         date=data["date"],
         start=data["start"],
         end=data["end"],
-        status="Active",
+        status="Pendiente",
         reason=data["reason"],
         user_id= 1
     )
@@ -247,7 +247,6 @@ def add_appointment():
 @api.route('/appointment/<int:appointment_id>', methods=['PUT'])
 def update_appointment(appointment_id):
     data = request.get_json()
-    print (data)
     appointment_actualizate = db.session.get(Appointment, appointment_id)
     if not appointment_actualizate:
         return jsonify({"msg": "Cita no encontrada"}), 404
@@ -258,8 +257,6 @@ def update_appointment(appointment_id):
     appointment_actualizate.end = data["end"],
     appointment_actualizate.reason = data["reason"],
     appointment_actualizate.patient.nombre= data["nombre"],
-
-    print()
 
     db.session.commit()
 
