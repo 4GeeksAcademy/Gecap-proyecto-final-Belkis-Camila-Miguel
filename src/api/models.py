@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import String, Boolean, ForeignKey, Integer, Float, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -118,4 +119,25 @@ class Appointment(db.Model):
             "end": self.end,
             "status": self.status,
             "reason": self.reason
+        }
+    
+class Message(db.Model):
+    __tablename__ = "message"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    full_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    dni: Mapped[str] = mapped_column(String(20), nullable=False) # <--- REVISA ESTA LÍNEA
+    phone: Mapped[str] = mapped_column(String(20), nullable=False)
+    reason: Mapped[str] = mapped_column(String(200), nullable=True)
+    status: Mapped[str] = mapped_column(String(50), default="pendiente")
+    created_at: Mapped[str] = mapped_column(String(50), default=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    
+    def serialize(self):
+        return {
+            "id": self.id,
+            "full_name": self.full_name,
+            "phone": self.phone,
+            "dni": self.dni,
+            "reason": self.reason,
+            "status": self.status,
+            "created_at": self.created_at
         }
