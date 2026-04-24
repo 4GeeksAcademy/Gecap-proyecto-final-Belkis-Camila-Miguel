@@ -303,7 +303,7 @@ export const FichaPaciente = () => {
                                         >
                                             Editar Ficha
                                         </button>
-                                        <button className="btn px-4 text-white" style={{ backgroundColor: "#e8888c", borderRadius: "10px" }} onClick={() => navigate("/agenda", { state: { pacienteId: p.id, nombre: p.nombre } })}>Nueva Consulta</button>
+                                        <button className="btn px-4 text-white" style={{ backgroundColor: "#e8888c", borderRadius: "10px" }} onClick={() => navigate("/areapersonal", { state: { pacienteId: p.id, nombre: p.nombre } })}>Nueva Consulta</button>
                                         <button className="btn px-4 text-white" style={{ backgroundColor: "#566873", borderRadius: "10px" }} onClick={() => window.print()}>Generar Informe</button>
                                         <button
                                             className="btn btn-outline-danger rounded-pill px-3 shadow-sm"

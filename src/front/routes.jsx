@@ -30,7 +30,7 @@ export const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/cita-rapida" element={<CitaRapida />} />
-      <Route path="/ver-cita/:citaId" element={<VerCitaPublica />} />
+      <Route element={<VerCitaPublica />} path="/mis-citas/:citaId" />
 
       <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
         <Route element={<Home />} path="" />
