@@ -81,7 +81,7 @@ function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCi
                         locale={es}
                         outsideClickIgnoreClass="react-datepicker__day--outside-month"
                     />
-                    <button className="btn fw-bold shadow-sm w-100 text-light" style={{ backgroundColor: "#93bbbf", letterSpacing: "0.7px" }}>
+                    <button className="btn fw-bold shadow-sm w-100 text-light mb-2" style={{ backgroundColor: "#93bbbf", letterSpacing: "0.7px" }}>
                         + Nueva cita
                     </button>
 

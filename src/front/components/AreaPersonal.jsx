@@ -5,9 +5,14 @@ import DoctorScheduleBar from "./DoctorScheduleBar/DoctorScheduleBar";
 
 function AreaPersonal() {
     const [pacientesHoy, setPacientesHoy] = useState([]);
-    const profesional = { nombre: "Juan Pérez" };
+    const [nombreUsuario, setNombreUsuario]= useState("Usuario")
     
     useEffect(() => {
+        const datosGuardados= localStorage.getItem("user");
+        if(datosGuardados){
+        const user= JSON.parse(datosGuardados);
+        setNombreUsuario (user.user_name);
+    }
         fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointments`, {
             method: "GET",
             headers: {
@@ -138,7 +143,7 @@ function AreaPersonal() {
 
                         <div className="text-end">
                             <p className="text-muted mb-0" style={{ fontSize: "1.3rem" }}>
-                                Bienvenido, <span className="fw-bold" style={{ color: "#4a5568" }}>{profesional.nombre}!</span>
+                                Bienvenido, <span className="fw-bold" style={{ color: "#4a5568" }}>{nombreUsuario}!</span>
                             </p>
                         </div>
                     </div>
