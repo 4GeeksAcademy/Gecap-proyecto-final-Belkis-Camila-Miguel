@@ -201,22 +201,29 @@ def delete_patient(id):
         return jsonify({"msg": "Error al eliminar", "error": str(e)}), 500
 
 @api.route('/appointments', methods=['GET'])
+@jwt_required()
 def get_all_appointment():
+    current_user_id = get_jwt_identity()
     result_all_appointment = db.session.execute(
-        select(Appointment)).scalars().all()
+        select(Appointment).where(Appointment.user_id == current_user_id)).scalars().all()
     return jsonify([appointment.serialize() for appointment in result_all_appointment]), 200
 
 
 @api.route('/appointment/<int:appointment_id>', methods=['GET'])
+@jwt_required()
 def get_appointment(appointment_id):
-    appointment = db.session.get(Appointment, appointment_id)
+    current_user_id= get_jwt_identity()
+    appointment = db.session.execute(
+        select(Appointment).where(Appointment.appointment_id == appointment_id, Appointment.user_id == current_user_id)).scalar_one_or_none()
     if appointment is None:
         return jsonify({"msg": "Cita no encontrada"}), 404
     return jsonify(appointment.serialize()), 200
 
 
 @api.route('/appointment', methods=['POST'])
+@jwt_required()
 def add_appointment():
+    current_user_id= get_jwt_identity()
     data = request.get_json()
     patient = db.session.execute(select(Patient).where(Patient.nombre == "prueba")).scalar_one_or_none()
 
@@ -232,7 +239,7 @@ def add_appointment():
         end=data["end"],
         status="Pendiente",
         reason=data["reason"],
-        user_id= 1
+        user_id=current_user_id
     )
 
     db.session.add(new_appointment)
@@ -245,18 +252,21 @@ def add_appointment():
 
 
 @api.route('/appointment/<int:appointment_id>', methods=['PUT'])
+@jwt_required()
 def update_appointment(appointment_id):
     data = request.get_json()
-    appointment_actualizate = db.session.get(Appointment, appointment_id)
+    current_user_id= get_jwt_identity()
+    appointment_actualizate = db.session.execute(
+    select(Appointment).where(Appointment.appointment_id == appointment_id, Appointment.user_id == current_user_id)).scalar_one_or_none()
     if not appointment_actualizate:
         return jsonify({"msg": "Cita no encontrada"}), 404
 
-    appointment_actualizate.date = data["date"],
-    appointment_actualizate.status = data["status"],
-    appointment_actualizate.start = data["start"],
-    appointment_actualizate.end = data["end"],
-    appointment_actualizate.reason = data["reason"],
-    appointment_actualizate.patient.nombre= data["nombre"],
+    appointment_actualizate.date = data["date"]
+    appointment_actualizate.status = data["status"]
+    appointment_actualizate.start = data["start"]
+    appointment_actualizate.end = data["end"]
+    appointment_actualizate.reason = data["reason"]
+    appointment_actualizate.patient.nombre= data["nombre"]
 
     db.session.commit()
 
@@ -264,10 +274,11 @@ def update_appointment(appointment_id):
 
 
 @api.route('/appointment/<int:appointment_id>', methods=['DELETE'])
+@jwt_required()
 def delete_appointment(appointment_id):
-
+    current_user_id=get_jwt_identity()
     appointment_to_delete = db.session.execute(select(Appointment).where(
-        Appointment.appointment_id == appointment_id)).scalar_one_or_none()
+        Appointment.appointment_id == appointment_id, Appointment.user_id==current_user_id)).scalar_one_or_none()
     if not appointment_to_delete:
         return jsonify({"msg": "la cita no existe"}), 450
 

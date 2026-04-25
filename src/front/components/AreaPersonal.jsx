@@ -67,6 +67,7 @@ function AreaPersonal() {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment/${id}`, {
                 method: "DELETE",
                 headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
                     "Authorization": `Bearer ${localStorage.getItem("token")}`
                 }
             });
@@ -86,7 +87,8 @@ function AreaPersonal() {
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment/${id}`, {
                 method: "PUT",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
                 },
                 body: JSON.stringify(datosActualizados)
             });
