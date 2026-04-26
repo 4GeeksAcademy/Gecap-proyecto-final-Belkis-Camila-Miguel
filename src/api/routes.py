@@ -237,7 +237,7 @@ def add_appointment():
         date=data["date"],
         start=data["start"],
         end=data["end"],
-        status="Pendiente",
+        status= data["status"],
         reason=data["reason"],
         user_id=current_user_id
     )
@@ -261,15 +261,15 @@ def update_appointment(appointment_id):
     if not appointment_actualizate:
         return jsonify({"msg": "Cita no encontrada"}), 404
 
-    appointment_actualizate.date = data["date"]
-    appointment_actualizate.status = data["status"]
-    appointment_actualizate.start = data["start"]
-    appointment_actualizate.end = data["end"]
-    appointment_actualizate.reason = data["reason"]
-    appointment_actualizate.patient.nombre= data["nombre"]
+
+    appointment_actualizate.date = data.get("date")
+    appointment_actualizate.status = data.get("status")
+    appointment_actualizate.start = data.get("start")
+    appointment_actualizate.end = data.get("end")
+    appointment_actualizate.reason = data.get("reason")
+    appointment_actualizate.patient.nombre= data.get("nombre", appointment_actualizate.patient.nombre)
 
     db.session.commit()
-
     return jsonify({"mensaje": f"Usuario {appointment_id} actualizado", "datos":appointment_actualizate.serialize()}), 200
 
 

@@ -68,7 +68,6 @@ function AreaPersonal() {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("token")}`,
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`
                 }
             });
 
@@ -92,6 +91,7 @@ function AreaPersonal() {
                 },
                 body: JSON.stringify(datosActualizados)
             });
+            console.log (datosActualizados)
 
             if (response.ok) {
                 const citaEditada = await response.json();
