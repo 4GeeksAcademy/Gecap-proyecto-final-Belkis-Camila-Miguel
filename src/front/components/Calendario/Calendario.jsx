@@ -9,6 +9,14 @@ function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCi
     const [startDate, setStartDate] = useState(new Date());
     const [mensajesWeb, setMensajesWeb] = useState([]);
     const [seleccionarVista, setSeleccionarVista] = useState("Day");
+    const [abrirModalBoton, setAbrirModalBoton] = useState(false)
+
+    useEffect(() => {
+        if (pacienteHoy.length > 0) {
+            const primeraFecha = pacienteHoy[0].start || pacienteHoy[0].date;
+            setStartDate(new Date(primeraFecha));
+        }
+    }, [pacienteHoy]);
 
     const manejarSeleccionDia = (date) => {
         setStartDate(date);
@@ -70,6 +78,8 @@ function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCi
                         pacientesHoy={pacienteHoy}
                         onActualizarCita={onActualizarCita}
                         seleccionarVista={seleccionarVista}
+                        abrirModalBoton={abrirModalBoton}
+                        setAbrirModalBoton={setAbrirModalBoton}
                     />
                 </div>
 
@@ -81,7 +91,11 @@ function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCi
                         locale={es}
                         outsideClickIgnoreClass="react-datepicker__day--outside-month"
                     />
-                    <button className="btn fw-bold shadow-sm w-100 text-light mb-2" style={{ backgroundColor: "#93bbbf", letterSpacing: "0.7px" }}>
+                    <button
+                        className="btn fw-bold shadow-sm w-100 mb-2"
+                        style={{ backgroundColor: "#93bbbf", color: "white", letterSpacing: "0.7px" }}
+                        onClick={() => setAbrirModalBoton(true)}
+                    >
                         + Nueva cita
                     </button>
 

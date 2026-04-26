@@ -27,8 +27,11 @@ function DoctorScheduleBar({ appointments, proximaCita }) {
 
     return {
       id: appointment.id,
-      title: appointment.motivo || "Consulta",
-      patientName: appointment.nombre || "Paciente",
+      title: appointment.motivo || appointment.reason || "Consulta",
+      patientName: (appointment.nombre || appointment.patient_name || "Paciente")
+        .replace(/None/g, "")
+        .replace(/\s+/g, " ")
+        .trim(),
       start,
       end
     };
