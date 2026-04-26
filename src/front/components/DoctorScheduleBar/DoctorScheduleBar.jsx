@@ -1,97 +1,114 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import "./DoctorScheduleBar.css";
 
-function DoctorScheduleBar({ appointments, proximaCita }) {
+function DoctorScheduleBar({ appointments }) {
   const workStart = 8;
-  const workEnd = 24;
+  const workEnd = 20;
   const totalHours = workEnd - workStart;
 
-  const now = new Date();
-  const currentTime = now.getHours() + now.getMinutes() / 60;
-  console.log(appointments)
-  const appointmentsBar = (appointments || []).map((appointment) => {
-    let start, end;
+  const [now, setNow] = useState(new Date());
 
-    if (appointment.start && appointment.end) {
-      const startDate = new Date(appointment.start);
-      const endDate = new Date(appointment.end);
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentTime = now.getHours() + now.getMinutes() / 60;
+
+  const appointmentsBar = (appointments || []).map((app) => {
+    let start, end;
+    if (app.start && app.end) {
+      const startDate = new Date(app.start);
+      const endDate = new Date(app.end);
       start = startDate.getHours() + startDate.getMinutes() / 60;
       end = endDate.getHours() + endDate.getMinutes() / 60;
     } else {
-      
-      const timeString = appointment.time || "00:00";
-      const [hours, minutes] = timeString.split(":").map(Number);
+      const [hours, minutes] = (app.hora || "00:00").split(":").map(Number);
       start = hours + (minutes || 0) / 60;
-      end = start + 0.5; 
+      end = start + 0.5;
     }
-
-    return {
-      id: appointment.id,
-      title: appointment.motivo || "Consulta",
-      patientName: appointment.nombre || "Paciente",
-      start,
-      end
-    };
+    return { ...app, start, end };
   });
 
-  let progress = ((currentTime - workStart) / totalHours) * 100;
-  if (progress < 0) progress = 0;
-  if (progress > 100) progress = 100;
+  const currentApp = appointmentsBar.find(a => currentTime >= a.start && currentTime < a.end);
+  const nextApp = appointmentsBar.find(a => a.start > currentTime);
 
-  const nextAppointment = appointmentsBar.find(
-    (appointment) => appointment.start > currentTime
-  );
-
+  let progress = 0;
   let minutesLeft = null;
-  if (nextAppointment) {
-    const hoursLeft = nextAppointment.start - currentTime;
-    minutesLeft = Math.round(hoursLeft * 60);
+
+  if (currentApp) {
+
+    const duration = currentApp.end - currentApp.start;
+    const elapsed = currentTime - currentApp.start;
+    progress = (elapsed / duration) * 100;
+    minutesLeft = Math.round((currentApp.end - currentTime) * 60);
+  } else {
+    progress = 0;
+    if (nextApp) minutesLeft = Math.round((nextApp.start - currentTime) * 60);
   }
+
+  progress = Math.max(0, Math.min(100, progress));
 
   const getCounterClass = () => {
     if (minutesLeft === null) return "counter-neutral";
-    if (minutesLeft > 45) return "counter-safe";
-    if (minutesLeft > 15) return "counter-warning";
-    return "counter-alert";
+    if (currentApp) {
+      return progress > 80 ? "counter-alert" : "counter-safe";
+    }
+    return minutesLeft <= 15 ? "counter-warning" : "counter-safe";
   };
 
   return (
     <div className="doctor-schedule-widget">
       <div className="doctor-schedule-row">
         <div className="schedule-bar-wrapper">
-          <div className="schedule-bar">
-            <div className="schedule-progress-fill" style={{ width: `${progress}%` }}></div>
-            <div className="current-time-indicator" style={{ left: `${progress}%` }}></div>
-            <div className="progress-text">{Math.round(progress)}%</div>
+          <div className={`schedule-bar ${currentApp && progress >= 100 ? "blink-animation" : ""}`}
+            style={{ backgroundColor: "#e9ecef", overflow: "hidden" }}>
 
-            {appointmentsBar.map((appointment) => {
-              const hoursFromStart = appointment.start - workStart;
-              const duration = appointment.end - appointment.start;
-              const left = (hoursFromStart / totalHours) * 100;
-              const width = (duration / totalHours) * 100;
-              const isNext = nextAppointment && appointment.id === nextAppointment.id;
+            <div
+              className="schedule-progress-fill"
+              style={{
+                width: `${progress}%`,
+                backgroundColor: progress >= 100 ? "#dc3545" : (progress > 80 ? "#e8888c" : "#93bbbf"),
+                transition: "width 0.5s ease-in-out"
+              }}
+            ></div>
 
+            {appointmentsBar.map((app) => {
+              const left = ((app.start - workStart) / totalHours) * 100;
+              const width = ((app.end - app.start) / totalHours) * 100;
               return (
                 <div
-                  key={appointment.id}
-                  className={`appointment-segment ${isNext ? "next-segment" : "normal-segment"}`}
-                  style={{ left: `${left}%`, width: `${width}%` }}
-                  title={`${appointment.title} - ${appointment.patientName}`}
+                  key={app.id}
+                  className="appointment-segment-bg"
+                  style={{
+                    left: `${left}%`,
+                    width: `${width}%`,
+                    position: "absolute",
+                    height: "100%",
+                    borderRight: "1px solid rgba(255,255,255,0.3)",
+                    backgroundColor: "rgba(0,0,0,0.05)"
+                  }}
                 ></div>
               );
             })}
+
+            <div className="progress-text" style={{ color: progress > 50 ? "white" : "#566873" }}>
+              {currentApp ? (progress >= 100 ? "TIEMPO AGOTADO" : `${Math.round(progress)}%`) : "Libre"}
+            </div>
           </div>
         </div>
 
         <div className={`time-counter ${getCounterClass()}`}>
-          {minutesLeft !== null ? `${minutesLeft} min` : "Sin citas"}
+          {minutesLeft !== null ? `${minutesLeft} min` : "---"}
         </div>
       </div>
 
       <div className="next-appointment-text">
-        {nextAppointment
-          ? `Próxima consulta: ${nextAppointment.patientName} - ${nextAppointment.title}`
-          : "No hay más consultas por hoy"}
+        {currentApp
+          ? `Paciente actual: ${currentApp.nombre || currentApp.user_name}`
+          : (nextApp
+            ? `Siguiente: ${nextApp.nombre || nextApp.user_name} (en ${minutesLeft} min)`
+            : "Jornada finalizada")}
       </div>
     </div>
   );

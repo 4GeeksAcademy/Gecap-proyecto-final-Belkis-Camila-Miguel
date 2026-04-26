@@ -10,6 +10,7 @@ function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCi
     const [mensajesWeb, setMensajesWeb] = useState([]);
     const [solicitarNuevaCita, setSolicitarNuevaCita] = useState(false);
     const [citas, setCitas] = useState([]);
+    
 
     const cargarMensajes = async () => {
         const token = localStorage.getItem("token");
@@ -63,9 +64,15 @@ function Calendario({ onAgregarCita, onEliminarCita, pacienteHoy, onActualizarCi
         }
     };
 
-    useEffect(() => {
+     useEffect(() => {     
         cargarCitasServidor();
         cargarMensajes();
+       
+        const timer = setInterval(() => {
+            cargarMensajes();            
+        }, 30000); 
+        
+        return () => clearInterval(timer);
     }, []);
 
     const handleAgregarCitaLocal = (nuevaCita) => {

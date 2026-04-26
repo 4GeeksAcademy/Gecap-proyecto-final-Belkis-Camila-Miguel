@@ -1,19 +1,25 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import String, Boolean, ForeignKey, Integer, Float, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 
 db = SQLAlchemy()
 
 class User(db.Model):
-    __tablename__ = "user"   
+    __tablename__ = "user"
     id: Mapped[int] = mapped_column(primary_key=True)
     user_name: Mapped[str] = mapped_column(String(30), nullable=False)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(250), nullable=False)
     role: Mapped[str] = mapped_column(String(20), default="medico")
     is_active: Mapped[bool] = mapped_column(Boolean(), default=True)
+    is_online: Mapped[bool] = mapped_column(Boolean(), default=False)      
+    dni: Mapped[Optional[str]] = mapped_column(String(20), unique=True, nullable=True)
+    telefono: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    direccion: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    especialidad: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    num_colegiado: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
 
     appointments: Mapped[List["Appointment"]] = relationship(back_populates="user")
 
@@ -23,9 +29,15 @@ class User(db.Model):
             "user_name": self.user_name,
             "email": self.email,
             "role": self.role,
-            "is_active": self.is_active
+            "is_active": self.is_active,
+            "is_online": self.is_online,
+            "dni": self.dni,
+            "telefono": self.telefono,
+            "direccion": self.direccion,
+            "especialidad": self.especialidad,
+            "num_colegiado": self.num_colegiado
         }
-
+    
 class Patient(db.Model):
     __tablename__ = "patient"
     patient_id: Mapped[int] = mapped_column(primary_key=True)
@@ -159,3 +171,4 @@ class Message(db.Model):
             "status": self.status,
             "created_at": self.created_at
         }
+   

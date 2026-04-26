@@ -16,6 +16,8 @@ import AreaPersonal from "./components/AreaPersonal.jsx";
 import { ListaPacientes } from "./components/ListaPacientes.jsx";
 import { CitaRapida } from "./components/CitaRapida.jsx";
 import { VerCitaPublica } from "./components/VerCitaPublica.jsx";
+import { ListadoMedicos } from "./components/ListadoMedicos.jsx";
+import { EditProfile } from "./components/EditProfile.jsx";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -39,6 +41,8 @@ export const router = createBrowserRouter(
         <Route element={<AreaPersonal />} path="/areapersonal" />
         <Route element={<Estadisticas />} path="/estadisticas" />
         <Route path="/pacientes" element={<ListaPacientes />} />
+        <Route element={<ListadoMedicos />} path="/equipo" />
+        <Route element={<EditProfile />} path="/perfil" />
       </Route>
     </>
   )

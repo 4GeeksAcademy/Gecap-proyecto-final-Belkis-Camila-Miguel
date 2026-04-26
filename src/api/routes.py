@@ -8,7 +8,6 @@ from flask_bcrypt import Bcrypt
 import time
 from datetime import datetime
 
-
 bcrypt = Bcrypt()
 
 api = Blueprint('api', __name__)
@@ -111,6 +110,33 @@ def get_user_profile():
         "perfil": perfil_data
     }), 200
 
+@api.route('/update-profile', methods=['PUT'])
+@jwt_required()
+def update_user_profile_unique_name():
+    current_user_id = get_jwt_identity()
+    data = request.get_json()
+    user = db.session.get(User, current_user_id)
+
+    try:        
+        user.user_name = data.get("nombre", user.user_name)
+        user.email = data.get("email", user.email)
+        user.dni = data.get("dni", user.dni)
+        user.telefono = data.get("telefono", user.telefono)
+        user.direccion = data.get("direccion", user.direccion)
+        user.especialidad = data.get("especialidad", user.especialidad)
+        user.num_colegiado = data.get("num_colegiado", user.num_colegiado)        
+        password = data.get("password")
+        if password and str(password).strip() != "":
+            user.password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+        db.session.commit()
+        return jsonify({"msg": "Perfil actualizado", "user": user.serialize()}), 200
+
+    except Exception as e:
+        db.session.rollback()        
+        print(f"DEBUG ERROR: {str(e)}")
+        return jsonify({"msg": "Error interno", "error": str(e)}), 500
+    
 @api.route('/pacientes', methods=['GET'])
 @jwt_required()
 def get_pacientes():
@@ -333,3 +359,40 @@ def get_all_messages():
     except Exception as e:
         print(f"Error en /messages: {str(e)}")
         return jsonify({"msg": "Error interno"}), 500
+
+@api.route('/medicos', methods=['GET'])
+def get_medicos():
+    try:  
+        
+        medicos = User.query.filter_by(role="medico").order_by(User.user_name).all()
+        return jsonify([m.serialize() for m in medicos]), 200
+    except Exception as e:
+        return jsonify({"msg": "Error en el servidor", "error": str(e)}), 500
+    
+@api.route('/update-profile', methods=['PUT'])
+@jwt_required()
+def update_profile():
+    current_user_id = get_jwt_identity()
+    data = request.get_json()
+    user_base = db.session.get(User, current_user_id)
+
+    try:        
+        if "password" in data and data["password"] != "":
+            user_base.password = bcrypt.generate_password_hash(data["password"]).decode('utf-8')
+
+        if user_base.role == "medico":
+            user_base.user_name = data.get("nombre", user_base.user_name)
+            user_base.email = data.get("email", user_base.email)
+        else:
+            perfil = Patient.query.filter_by(user_id=user_base.id).first()
+            perfil.nombre = data.get("nombre", perfil.nombre)
+            perfil.apellidos = data.get("apellidos", perfil.apellidos)
+            user_base.email = data.get("email", user_base.email)
+
+        db.session.commit()       
+        updated_data = user_base.serialize() if user_base.role == "medico" else perfil.serialize()
+        return jsonify({"msg": "Perfil actualizado", "user": updated_data}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"msg": "Error", "error": str(e)}), 500

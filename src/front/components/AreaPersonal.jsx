@@ -131,7 +131,7 @@ function AreaPersonal() {
 
                         <div className="text-end">
                             <p className="text-muted mb-0" style={{ fontSize: "1.3rem" }}>
-                                Bienvenido, <span className="fw-bold" style={{ color: "#4a5568" }}>
+                                Bienvenido/a, <span className="fw-bold" style={{ color: "#4a5568" }}>
                                    
                                     {nombreDoctor}!
                                 </span>

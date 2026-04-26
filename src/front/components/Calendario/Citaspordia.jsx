@@ -98,59 +98,69 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
         }
     };
 
-  const handleGuardarCita = async () => {
-    if (!selectedRange || !selectedRange.start) {
-        alert("Por favor, selecciona un horario.");
-        return;
-    }
-
-    const motivoFinal = formData.motivo === "Otro" ? formData.otroMotivo : formData.motivo;
-    const citaParaEnviar = {
-        patient_id: formData.patient_id,
-        message_id: formData.message_id,
-        nombre: formData.nombre,
-        telefono: formData.telefono,
-        fecha: formData.fecha || selectedRange.start.toString("yyyy-MM-dd"),
-        hora: formData.hora || selectedRange.start.toString("HH:mm"),
-        motivo: motivoFinal,
-        start: selectedRange.start.toString(),
-        end: selectedRange.end ? selectedRange.end.toString() : selectedRange.start.addMinutes(30).toString()
-    };
-
-    try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("token")}`
-            },
-            body: JSON.stringify(citaParaEnviar)
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            if (onAgregarCita) onAgregarCita(data.appointment || data);
-                      
-            setShowModal(false);
-            setFormData({
-                nombre: "", telefono: "", motivo: "", otroMotivo: "",
-                hora: "10:00", patient_id: null, message_id: null
-            });
-            if (calendar) calendar.clearSelection();
-            
-            alert("Cita guardada correctamente");
+    const handleGuardarCita = async () => {
+        if (!selectedRange || !selectedRange.start) {
+            alert("Por favor, selecciona un horario.");
+            return;
         }
-    } catch (error) {
-        console.error("Error:", error);
-    }
+
+        const motivoFinal = formData.motivo === "Otro" ? formData.otroMotivo : formData.motivo;
+        const citaParaEnviar = {
+            patient_id: formData.patient_id,
+            message_id: formData.message_id,
+            nombre: formData.nombre,
+            telefono: formData.telefono,
+            fecha: formData.fecha || selectedRange.start.toString("yyyy-MM-dd"),
+            hora: formData.hora || selectedRange.start.toString("HH:mm"),
+            motivo: motivoFinal,
+            start: selectedRange.start.toString(),
+            end: selectedRange.end ? selectedRange.end.toString() : selectedRange.start.addMinutes(30).toString()
+        };
+
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/appointment`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                },
+                body: JSON.stringify(citaParaEnviar)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (onAgregarCita) onAgregarCita(data.appointment || data);
+
+                setShowModal(false);
+                setFormData({
+                    nombre: "", telefono: "", motivo: "", otroMotivo: "",
+                    hora: "10:00", patient_id: null, message_id: null
+                });
+                if (calendar) calendar.clearSelection();
+
+                alert("Cita guardada correctamente");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
     };
 
     const config = {
         viewType: "Day",
+        locale: "es-es",
+        timeFormat: "Clock24Hours",        
+        heightSpec: "BusinessHours",
+        businessBeginsHour: 8,
+        businessEndsHour: 21,
+        showNonBusiness: false,         
+        dayBeginsHour: 8,
+        dayEndsHour: 21,
+        heightSpec: "BusinessHoursNoScroll",
+        cellDuration: 30,
         onTimeRangeSelected: (args) => {
             setSelectedRange({ start: args.start, end: args.end });
-            setFormData(prev => ({ 
-                ...prev, 
+            setFormData(prev => ({
+                ...prev,
                 hora: args.start.toString("HH:mm"),
                 fecha: args.start.toString("yyyy-MM-dd")
             }));
@@ -183,12 +193,9 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                             <h4 className="fw-bold mb-0" style={{ color: "#566873" }}>Agendar Cita</h4>
                             <button className="btn-close" onClick={() => setShowModal(false)}></button>
                         </div>
-
-                        {/* SELECCIÓN DE PACIENTE (Dropdown + Input) */}
+                      
                         <div className="mb-1 position-relative">
-                            <label className="form-label small fw-bold text-muted">PACIENTE</label>
-
-                            {/* Selector de pacientes existentes */}
+                            <label className="form-label small fw-bold text-muted">PACIENTE</label>                            
                             <select
                                 className="form-select bg-light border-0 py-2 mb-2"
                                 style={{ borderRadius: "10px", fontSize: "0.9rem" }}
@@ -233,8 +240,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                                 }}
                                 autoComplete="off"
                             />
-
-                            {/* Sugerencias de búsqueda manual */}
+                           
                             {sugerencias.length > 0 && (
                                 <ul className="list-group position-absolute w-100 shadow-lg" style={{ zIndex: 1000, top: "100%", borderRadius: "10px" }}>
                                     {sugerencias.map(p => (
@@ -259,8 +265,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                                 </ul>
                             )}
                         </div>
-
-                        {/* FECHA */}
+                       
                         <div className="mb-1">
                             <label className="form-label small fw-bold text-muted">FECHA DE LA CITA</label>
                             <input
@@ -271,8 +276,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                                 onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
                             />
                         </div>
-
-                        {/* TELÉFONO Y HORA */}
+                        
                         <div className="row">
                             <div className="col-md-7">
                                 <label className="form-label small fw-bold text-muted">TELÉFONO</label>
@@ -296,8 +300,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                                 />
                             </div>
                         </div>
-
-                        {/* MOTIVO */}
+                       
                         <div className="mb-1">
                             <label className="form-label small fw-bold text-muted">MOTIVO DE CONSULTA</label>
                             <select
@@ -326,8 +329,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                                 onChange={(e) => setFormData({ ...formData, otroMotivo: e.target.value })}
                             />
                         )}
-
-                        {/* BOTONES ACCIÓN */}
+                       
                         <div className="d-flex gap-2 mt-3">
                             <button
                                 className="btn w-100 fw-bold text-white py-2 shadow-sm"

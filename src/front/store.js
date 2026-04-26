@@ -108,6 +108,9 @@ export default function storeReducer(store, action = {}) {
         appointments: action.payload
       };
 
+    case "update_user":
+    return { ...state, user: action.payload };
+
     default:
       return store;
   }
