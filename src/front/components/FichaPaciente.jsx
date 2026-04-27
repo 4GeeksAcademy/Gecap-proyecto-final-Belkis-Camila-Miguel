@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";
+import Cloudinary from "./Cloudinary";
 
 export const FichaPaciente = () => {
     const { store, dispatch } = useGlobalReducer();
     const p = store.pacienteActual;
     const navigate = useNavigate();
+    const [fotoPaciente, setFotoPaciente] = useState("");
 
     if (!p) {
         return (
@@ -152,6 +154,12 @@ export const FichaPaciente = () => {
 
             {/* 2. CABECERA DE IDENTIDAD */}
             <div className="d-flex justify-content-between align-items-center mb-4 p-4 rounded-4 shadow-sm bg-white border-start border-5 mt-3" style={{ borderColor: "#e8888c" }}>
+                <div className="d-flex flex-column align-items-center">
+                    <Cloudinary
+                        imageUrl={fotoPaciente}
+                        onImageUpload={setFotoPaciente}
+                    />
+                </div>
                 <div>
                     <h2 className="mb-0 fw-bold" style={{ color: "#566873" }}>
                         {p.nombre} {p.apellidos}
@@ -162,6 +170,7 @@ export const FichaPaciente = () => {
                         {saludable && <span className="badge bg-success px-3 py-2"><i className="fas fa-medal me-1"></i> Peso Saludable</span>}
                     </div>
                 </div>
+                
                 <div className="text-end">
                     <p className="mb-0 text-muted small uppercase fw-bold">Última actualización</p>
                     <p className="fw-bold h5" style={{ color: "#566873" }}>{new Date().toLocaleDateString()}</p>
