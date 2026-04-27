@@ -201,7 +201,7 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
         cellHeight: 40,
         theme: "calendar_default",
         durationBarVisible: false,
-        timeRangeSelectedHandling: "Enabled",
+        
 
 
         onEventMoved: (args) => datosParaActualizar(args),

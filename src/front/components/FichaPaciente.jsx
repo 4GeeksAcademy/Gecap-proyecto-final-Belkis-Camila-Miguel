@@ -7,7 +7,9 @@ export const FichaPaciente = () => {
     const { store, dispatch } = useGlobalReducer();
     const p = store.pacienteActual;
     const navigate = useNavigate();
-    const [fotoPaciente, setFotoPaciente] = useState("");
+    const [fotoPaciente, setFotoPaciente] = useState(
+        localStorage.getItem(`fotoPaciente_${p?.id}`) || ""
+    );
 
     if (!p) {
         return (
@@ -157,7 +159,10 @@ export const FichaPaciente = () => {
                 <div className="d-flex flex-column align-items-center">
                     <Cloudinary
                         imageUrl={fotoPaciente}
-                        onImageUpload={setFotoPaciente}
+                        onImageUpload={(url) => {
+                            setFotoPaciente(url);
+                            localStorage.setItem(`fotoPaciente_${p.id}`, url);
+                        }}
                     />
                 </div>
                 <div>
