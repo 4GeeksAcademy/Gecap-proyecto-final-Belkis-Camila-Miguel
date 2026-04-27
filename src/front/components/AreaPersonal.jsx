@@ -3,9 +3,11 @@ import Calendario from "./Calendario/Calendario";
 import { useState, useEffect } from 'react';
 import DoctorScheduleBar from "./DoctorScheduleBar/DoctorScheduleBar";
 
+
 function AreaPersonal() {
     const [pacientesHoy, setPacientesHoy] = useState([]);
-    const [nombreUsuario, setNombreUsuario]= useState("Usuario")
+    const [nombreUsuario, setNombreUsuario]= useState("Usuario");
+    
     
     useEffect(() => {
         const datosGuardados= localStorage.getItem("user");
@@ -172,6 +174,7 @@ function AreaPersonal() {
                     </div>
                 </div>
             </div>
+            
         </div>
     );
 }

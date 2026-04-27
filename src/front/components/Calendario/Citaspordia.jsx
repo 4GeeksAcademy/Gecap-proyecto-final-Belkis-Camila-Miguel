@@ -44,31 +44,30 @@ const CitasPorDia = ({ fechaSeleccionada, onAgregarCita, onEliminarCita, pacient
                 ? new DayPilot.Date(p.end)
                 : start.addMinutes(30);
 
+            const nombreLimpio = (p.nombre || p.patient_name || "Paciente")
+                .replace(/None/g, "")
+                .replace(/\s+/g, " ")
+                .trim();
+
             return {
                 id: p.id,
-                text: `${(p.nombre || p.patient_name || "Paciente")
-                    .replace(/None/g, "")
-                    .replace(/\s+/g, " ")
-                    .trim()} - ${p.motivo || p.reason || "Consulta"}`,
+                text: `${nombreLimpio} - ${p.motivo || p.reason || "Consulta"}`,
                 start,
                 end,
-                backColor: "#93c47d",
+                status: p.status,
+                backColor:
+                    p.status === "asistio"
+                        ? "#6e8d90"
+                        : p.status === "no asistio"
+                            ? "#a66d6d"
+                            : "#8184d6"
             };
         }).filter(Boolean);
 
         calendar.update({
             startDate: new DayPilot.Date(fechaSeleccionada),
-            events: eventos,
             columns: seleccionarVista === "Day" ? [{ name: "Agenda Médica", id: "C1" }] : undefined,
-            events: pacientesHoy.map(p => ({
-                id: p.id,
-                text: `${p.nombre || p.patient_name || "Paciente"} - ${p.motivo || p.reason || "Consulta"}`,
-                start: p.start,
-                end: p.end,
-                status: p.status,
-                backColor: p.status === "asistio" ? "#6e8d90" : p.status === "no asistio" ? "#a66d6d" : "#8184d6"
-            })),
-
+            events: eventos
         });
     }, [calendar, fechaSeleccionada, pacientesHoy]);
 
